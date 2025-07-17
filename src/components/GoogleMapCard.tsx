@@ -1,8 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Fish, Anchor, Shield, AlertTriangle, Navigation, Star } from 'lucide-react';
+import { MapPin, Fish, Anchor, Shield, AlertTriangle, Navigation, Star, Loader2 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
+import { useTheme } from 'next-themes';
 
 interface FishingPOI {
   id: number;
@@ -24,6 +25,7 @@ interface UserLocation {
 }
 
 const GoogleMapCard = () => {
+  const { theme } = useTheme();
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -31,18 +33,36 @@ const GoogleMapCard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Load Google Maps API
+  // Load Google Maps API with better error handling
   const loadGoogleMaps = () => {
     if (window.google && window.google.maps) {
       setIsGoogleMapsLoaded(true);
       return;
     }
 
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      setError('Google Maps API key is not configured. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your environment variables.');
+      setIsLoading(false);
+      return;
+    }
+
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry&callback=initMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMap`;
     script.async = true;
     script.defer = true;
+    
+    script.onerror = () => {
+      if (retryCount < 3) {
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => loadGoogleMaps(), 2000);
+      } else {
+        setError('Failed to load Google Maps. Please check your internet connection and API key.');
+        setIsLoading(false);
+      }
+    };
     
     // @ts-ignore
     window.initMap = () => {
@@ -61,7 +81,7 @@ const GoogleMapCard = () => {
     if (isGoogleMapsLoaded && userLocation && mapRef.current) {
       initializeMap();
     }
-  }, [isGoogleMapsLoaded, userLocation]);
+  }, [isGoogleMapsLoaded, userLocation, theme]);
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -94,8 +114,33 @@ const GoogleMapCard = () => {
   const initializeMap = () => {
     if (!mapRef.current || !userLocation || !window.google) return;
 
-    // Modern map styles
-    const mapStyles = [
+    // Dark mode map styles
+    const darkMapStyles = [
+      { elementType: "geometry", stylers: [{ color: "#212121" }] },
+      { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+      { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#757575" }] },
+      { featureType: "administrative.country", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+      { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+      { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#bdbdbd" }] },
+      { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#181818" }] },
+      { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+      { featureType: "poi.park", elementType: "labels.text.stroke", stylers: [{ color: "#1b1b1b" }] },
+      { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#2c2c2c" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
+      { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#373737" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3c3c3c" }] },
+      { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#4e4e4e" }] },
+      { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+      { featureType: "transit", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] },
+      { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3d3d3d" }] }
+    ];
+
+    // Light mode map styles  
+    const lightMapStyles = [
       { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
       { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
       { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
@@ -117,14 +162,17 @@ const GoogleMapCard = () => {
       { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }
     ];
 
-    // Initialize Google Map
+    // Initialize Google Map with theme-aware styles
     const map = new google.maps.Map(mapRef.current, {
       center: userLocation,
       zoom: 13,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      styles: mapStyles,
-      disableDefaultUI: true,
+      styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+      disableDefaultUI: false,
       zoomControl: true,
+      streetViewControl: false,
+      fullscreenControl: true,
+      mapTypeControl: false,
     });
 
     googleMapRef.current = map;
@@ -303,17 +351,17 @@ const GoogleMapCard = () => {
   const getColorForPOI = (type: string) => {
     switch (type) {
       case 'fishing_spot':
-        return 'border-blue-500 bg-blue-50';
+        return 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400';
       case 'marina':
-        return 'border-purple-500 bg-purple-50';
+        return 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-400';
       case 'bait_shop':
-        return 'border-green-500 bg-green-50';
+        return 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400';
       case 'safety_station':
-        return 'border-red-500 bg-red-50';
+        return 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-400';
       case 'restaurant':
-        return 'border-yellow-500 bg-yellow-50';
+        return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-400';
       default:
-        return 'border-gray-500 bg-gray-50';
+        return 'border-gray-500 bg-gray-50 dark:bg-gray-900/20 dark:border-gray-400';
     }
   };
 
@@ -327,11 +375,14 @@ const GoogleMapCard = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center h-full bg-gray-50 rounded-2xl">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-lg font-semibold text-gray-800">Locating Your Position...</p>
-            <p className="text-sm text-gray-500">Fetching nearby fishing data.</p>
+        <div className="flex items-center justify-center h-full glass-card rounded-2xl">
+          <div className="text-center p-8">
+            <Loader2 className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-6" />
+            <p className="text-xl font-semibold text-foreground mb-2">Loading Interactive Map...</p>
+            <p className="text-sm text-muted-foreground">Fetching your location and nearby fishing spots</p>
+            {retryCount > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">Retry attempt {retryCount}/3</p>
+            )}
           </div>
         </div>
       );
@@ -339,11 +390,34 @@ const GoogleMapCard = () => {
 
     if (error) {
       return (
-        <div className="flex items-center justify-center h-full bg-red-50 rounded-2xl">
-          <div className="text-center p-6">
-            <AlertTriangle className="w-12 h-12 mb-4 mx-auto text-red-600" />
-            <p className="font-bold text-red-800">Map Error</p>
-            <p className="text-sm text-red-700">{error}</p>
+        <div className="flex items-center justify-center h-full glass-card rounded-2xl">
+          <div className="text-center p-8 max-w-md">
+            <AlertTriangle className="w-16 h-16 mb-6 mx-auto text-red-600 dark:text-red-400" />
+            <h3 className="text-xl font-bold text-foreground mb-4">Map Error</h3>
+            <p className="text-sm text-muted-foreground mb-6">{error}</p>
+            <div className="space-y-3">
+              <button 
+                onClick={() => {
+                  setError(null);
+                  setIsLoading(true);
+                  setRetryCount(0);
+                  loadGoogleMaps();
+                }}
+                className="btn-primary w-full"
+              >
+                Retry Loading Map
+              </button>
+              {error.includes('API key') && (
+                <div className="glass-card-sm p-4 text-left">
+                  <h4 className="font-semibold text-foreground mb-2">Setup Instructions:</h4>
+                  <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                    <li>Get a Google Maps API key from Google Cloud Console</li>
+                    <li>Enable Maps JavaScript API and Places API</li>
+                    <li>Add the key to your .env.local file as NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</li>
+                  </ol>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       );
@@ -352,33 +426,36 @@ const GoogleMapCard = () => {
     return (
       <div className="flex flex-col h-full">
         {/* Map container */}
-        <div ref={mapRef} className="flex-grow rounded-t-2xl" />
+        <div ref={mapRef} className="flex-grow rounded-t-2xl min-h-[400px]" />
         
         {/* POI list */}
-        <div className="p-4 bg-white rounded-b-2xl h-72 overflow-y-auto">
-          <h4 className="text-lg font-bold text-gray-900 mb-3">Nearby Points of Interest</h4>
+        <div className="p-6 glass-card-sm rounded-b-2xl h-72 overflow-y-auto">
+          <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Navigation className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            Nearby Fishing Spots
+          </h4>
           {fishingPOIs.length > 0 ? (
             <ul className="space-y-3">
               {fishingPOIs.slice(0, 10).map((poi) => (
                 <li 
                   key={poi.id} 
-                  className={`p-3 rounded-xl border-l-4 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 ${getColorForPOI(poi.type)}`}
+                  className={`glass-card-sm p-4 border-l-4 transition-all duration-300 hover:shadow-lg cursor-pointer ${getColorForPOI(poi.type)}`}
                   onClick={() => getDirections(poi)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md">
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-md">
                         {getIconForPOI(poi.type)}
                       </div>
                       <div>
-                        <p className="font-semibold text-md text-gray-900">{poi.name}</p>
-                        <p className="text-xs text-gray-600 truncate max-w-xs">{poi.description}</p>
+                        <p className="font-semibold text-foreground">{poi.name}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-xs">{poi.description}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
-                      <p className="text-md font-bold text-gray-800">{poi.distance.toFixed(1)} km</p>
+                      <p className="text-sm font-bold text-foreground">{poi.distance.toFixed(1)} km</p>
                       {poi.rating && (
-                        <div className="flex items-center justify-end text-xs text-amber-600 mt-1">
+                        <div className="flex items-center justify-end text-xs text-amber-600 dark:text-amber-400 mt-1">
                           <Star className="w-3 h-3 mr-1 fill-current" />
                           <span className="font-semibold">{poi.rating.toFixed(1)}</span>
                         </div>
@@ -390,9 +467,9 @@ const GoogleMapCard = () => {
             </ul>
           ) : (
             <div className="text-center py-8">
-              <Fish className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-600 font-semibold">No Fishing Spots Found Nearby</p>
-              <p className="text-sm text-gray-400">Try zooming out or exploring a different area.</p>
+              <Fish className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-foreground font-semibold">No Fishing Spots Found Nearby</p>
+              <p className="text-sm text-muted-foreground">Try zooming out or exploring a different area.</p>
             </div>
           )}
         </div>
@@ -401,7 +478,20 @@ const GoogleMapCard = () => {
   };
 
   return (
-    <Card className="modern-card-tall animate-fade-in hover-lift overflow-hidden">
+    <Card className="modern-card-tall overflow-hidden">
+      <CardHeader className="glass-card p-4 border-b border-border">
+        <CardTitle className="flex items-center gap-3 text-foreground">
+          <div className="w-10 h-10 glass-card-sm flex items-center justify-center rounded-xl">
+            <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          Interactive Fishing Map
+          {userLocation && (
+            <span className="text-xs glass-card-sm px-2 py-1 rounded-full text-green-600 dark:text-green-400">
+              Live Location
+            </span>
+          )}
+        </CardTitle>
+      </CardHeader>
       <CardContent className="p-0 h-full">
         {renderContent()}
       </CardContent>
