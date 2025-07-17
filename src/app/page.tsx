@@ -5,8 +5,6 @@ import { WeatherCard } from "@/components/WeatherCard";
 import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
 import { Chatbot } from "@/components/Chatbot";
-import { MapCard } from "@/components/MapCard";
-
 
 export default function Home() {
   return (
@@ -28,8 +26,7 @@ export default function Home() {
             <FishingLawsChat />
             <SafetyTips />
           </div>
-          <div className="space-y-8">
-             <MapCard />
+          <div className="flex h-full">
              <Chatbot />
           </div>
         </div>

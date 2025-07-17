@@ -72,7 +72,7 @@ export function Chatbot() {
   }
 
   return (
-    <Card className="shadow-lg h-[44rem] flex flex-col">
+    <Card className="shadow-lg flex flex-col w-full">
        <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Bot className="w-6 h-6 text-primary" />
