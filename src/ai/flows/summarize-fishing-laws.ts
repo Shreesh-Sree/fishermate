@@ -8,9 +8,20 @@
  * - SummarizeFishingLawsOutput - The return type for the summarizeFishingLaws function.
  */
 
-import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import wav from 'wav';
+
+// Dedicated AI instance for this flow, using a specific API key.
+const fishingLawsAI = genkit({
+  plugins: [
+    googleAI({
+      apiKey: process.env.FISHING_LAWS_API_KEY,
+    }),
+  ],
+});
+
 
 const SummarizeFishingLawsInputSchema = z.object({
   state: z.string().describe('The state for which to summarize fishing laws.'),
@@ -28,7 +39,7 @@ export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Pr
   return summarizeFishingLawsFlow(input);
 }
 
-const summarizeFishingLawsPrompt = ai.definePrompt({
+const summarizeFishingLawsPrompt = fishingLawsAI.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
   output: {schema: z.string().nullable()},
@@ -66,7 +77,7 @@ async function toWav(
   });
 }
 
-const summarizeFishingLawsFlow = ai.defineFlow(
+const summarizeFishingLawsFlow = fishingLawsAI.defineFlow(
   {
     name: 'summarizeFishingLawsFlow',
     inputSchema: SummarizeFishingLawsInputSchema,
@@ -77,7 +88,7 @@ const summarizeFishingLawsFlow = ai.defineFlow(
     const validSummary = summary ?? "I'm sorry, I was unable to generate a summary for your query. Please try again with a different question.";
 
 
-    const {media} = await ai.generate({
+    const {media} = await fishingLawsAI.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       config: {
         responseModalities: ['AUDIO'],
