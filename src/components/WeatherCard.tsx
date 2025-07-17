@@ -167,8 +167,8 @@ export function WeatherCard() {
             cloudCover: Math.round(current.variables(9)!.value()),
             dewPoint: Math.round(current.variables(10)!.value()),
             isDay,
-            sunrise: formatTime(daily.time(0) + daily.variables(0)!.value(0)),
-            sunset: formatTime(daily.time(0) + daily.variables(1)!.value(0)),
+            sunrise: formatTime(Number(daily.time(0)) + Number(daily.variables(0)!.value(0))),
+            sunset: formatTime(Number(daily.time(0)) + Number(daily.variables(1)!.value(0))),
           },
         });
 
