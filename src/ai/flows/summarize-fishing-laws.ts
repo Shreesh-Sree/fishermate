@@ -48,27 +48,30 @@ export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Pr
 const summarizeFishingLawsPrompt = ai.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
-  output: {schema: z.string()},
-  model: 'googleai/gemini-1.5-flash-latest',
-  prompt: `You are an expert on Indian fishing laws and marine regulations with comprehensive knowledge of state-specific and central government fishing policies.
+  output: {schema: z.string().min(1, "Response must not be empty")},
+  model: 'googleai/gemini-1.5-flash',
+  config: {
+    temperature: 0.2,
+    maxOutputTokens: 1500,
+    topP: 0.8,
+  },
+  prompt: `You are an expert on Indian fishing laws and marine regulations.
 
 State: {{state}}
-Query: "{{query}}"
+User Question: {{query}}
 
-Please provide a detailed and accurate response about fishing laws for {{state}} based on the query. Your response should include:
+Provide a comprehensive response about fishing laws for {{state}}. Include:
 
-1. **State-specific regulations** for {{state}} if available
-2. **Central/National laws** that apply across India
-3. **Practical guidance** for fisherfolk
-4. **Penalties and consequences** for violations
-5. **Licensing and permit requirements**
-6. **Seasonal restrictions and banned periods**
-7. **Equipment and method restrictions**
-8. **Marine protected areas and restricted zones**
+1. State-specific regulations for {{state}}
+2. Central/National laws applicable across India  
+3. Practical guidance for fisherfolk
+4. Licensing and permit requirements
+5. Seasonal restrictions and banned periods
+6. Equipment and method restrictions
 
-If specific information for {{state}} is not available, clearly state this and provide general Indian fishing law guidelines. Always prioritize accuracy and include relevant legal references where possible.
+If specific {{state}} information is unavailable, provide general Indian fishing guidelines and clearly state this limitation.
 
-Format your response in clear, easy-to-understand language suitable for fisherfolk communities.`,
+Use clear, simple language suitable for fishing communities. Always provide a substantive response - never return empty content.`,
 });
 
 const summarizeFishingLawsFlow = ai.defineFlow(
@@ -88,30 +91,59 @@ const summarizeFishingLawsFlow = ai.defineFlow(
         };
       }
 
-      const {output: summary} = await summarizeFishingLawsPrompt(input);
+      console.log('Calling AI prompt with input:', input);
       
-      if (!summary || typeof summary !== 'string') {
-        throw new Error('No valid summary generated from AI model');
+      let summary: string | null = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      // Retry logic for AI prompt calls
+      while (retryCount < maxRetries && !summary) {
+        try {
+          const result = await summarizeFishingLawsPrompt(input);
+          summary = result.output;
+          
+          if (!summary || summary.trim().length === 0) {
+            throw new Error(`AI returned empty response on attempt ${retryCount + 1}`);
+          }
+          
+          console.log('AI response received:', summary ? 'success' : 'empty');
+        } catch (promptError) {
+          console.error(`AI prompt attempt ${retryCount + 1} failed:`, promptError);
+          retryCount++;
+          
+          if (retryCount < maxRetries) {
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          }
+        }
+      }
+      
+      if (!summary || typeof summary !== 'string' || summary.trim().length === 0) {
+        console.error('All AI prompt attempts failed or returned empty response');
+        throw new Error('AI model failed to generate a valid response after multiple attempts');
       }
 
       // Try to generate audio, but don't fail if it doesn't work
       let audioUrl: string | undefined;
       try {
-        const {media} = await ai.generate({
-          model: 'googleai/gemini-2.5-flash-preview-tts',
-          config: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {voiceName: 'Algenib'},
+        if (summary && summary.length > 50) { // Only try audio for substantial content
+          const {media} = await ai.generate({
+            model: 'googleai/gemini-2.0-flash-thinking-exp',
+            config: {
+              responseModalities: ['AUDIO'],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {voiceName: 'Algenib'},
+                },
               },
             },
-          },
-          prompt: summary,
-        });
+            prompt: summary.substring(0, 1000), // Limit length for audio
+          });
 
-        if (media?.url) {
-          audioUrl = media.url;
+          if (media?.url) {
+            audioUrl = media.url;
+          }
         }
       } catch (audioError) {
         console.warn('Audio generation failed:', audioError);
@@ -125,26 +157,79 @@ const summarizeFishingLawsFlow = ai.defineFlow(
     } catch (error) {
       console.error('Fishing laws flow error:', error);
       
-      // Return a fallback response
+      // Use comprehensive fallback response with state-specific information
       return {
-        summary: `I apologize, but I'm currently unable to provide specific fishing law information for ${input.state}. Here are some general guidelines:
-
-**General Indian Fishing Laws:**
-- Commercial fishing requires valid licenses from the Department of Fisheries
-- Seasonal bans typically occur during monsoon months (varies by state)
-- Minimum mesh size regulations apply to fishing nets
-- Marine protected areas have specific restrictions
-- Deep-sea fishing requires additional permits
-
-**Recommended Actions:**
-1. Contact your local Department of Fisheries office for ${input.state}-specific regulations
-2. Check with local fishermen associations for current guidelines
-3. Verify seasonal restrictions before planning fishing activities
-4. Ensure all required licenses and permits are current
-
-For the most accurate and up-to-date information, please consult official government sources or local fisheries authorities.`,
+        summary: generateFallbackFishingLawsInfo(input.state, input.query),
         audio: undefined,
       };
     }
   }
 );
+
+// Backup function for generating fishing laws information without AI
+const generateFallbackFishingLawsInfo = (state: string, query: string): string => {
+  const stateInfo = getFishingLawsByState(state);
+  
+  return `**Fishing Laws Information for ${state}**
+
+${stateInfo}
+
+**Your Question:** "${query}"
+
+**General Indian Fishing Laws:**
+
+**🏛️ Central Government Regulations:**
+- Marine Fishing Regulation Acts apply to all coastal states
+- Commercial fishing requires licenses from Department of Fisheries
+- Deep-sea fishing beyond 12 nautical miles needs special permits
+- Boat registration mandatory for all mechanized vessels
+
+**📅 Seasonal Restrictions:**
+- Monsoon fishing ban typically from June to August (varies by state)
+- Ban periods designed to protect fish breeding seasons
+- Emergency fishing may be allowed with special permissions
+- Dates announced annually by state fisheries departments
+
+**🎣 Equipment Regulations:**
+- Minimum mesh size requirements (usually 35mm for trawl nets)
+- Prohibition of certain destructive fishing methods
+- LED lights and fish aggregating devices regulated
+- GPS and communication equipment mandatory for deep-sea boats
+
+**⚖️ Compliance Requirements:**
+- Valid fishing license and boat registration
+- Adherence to gear and mesh size restrictions
+- Compliance with seasonal fishing bans
+- Proper fish landing documentation
+
+**🚨 Penalties:**
+- Violations can result in fines ranging from ₹5,000 to ₹50,000
+- Repeat offenses may lead to license cancellation
+- Illegal fishing equipment may be confiscated
+- Criminal charges for serious violations
+
+**📞 Contact Information:**
+- Local Fisheries Office: Contact your district fisheries department
+- State Fisheries Department: Check official state government websites
+- Central Marine Fisheries Research Institute (CMFRI) for technical guidance
+
+**Important:** Laws change frequently. Always verify current regulations with official sources before fishing activities.`;
+};
+
+// State-specific information helper
+const getFishingLawsByState = (state: string): string => {
+  const stateData: { [key: string]: string } = {
+    'Andhra Pradesh': 'Andhra Pradesh Marine Fishing Regulation Act, 1995 applies. Fishing ban typically from April 15 to June 14.',
+    'Tamil Nadu': 'Tamil Nadu Marine Fishing Regulation Act, 1983 governs fishing activities. Ban period usually April 15 to June 14.',
+    'Kerala': 'Kerala Marine Fishing Regulation Act, 1980 is applicable. Monsoon ban from June 15 to July 31.',
+    'Karnataka': 'Karnataka Marine Fishing Regulation Act, 1986 applies. Fishing ban from June 1 to July 31.',
+    'Goa': 'Goa Marine Fishing Regulation Rules apply. Monsoon ban typically from June 1 to July 31.',
+    'Maharashtra': 'Maharashtra Marine Fishing Regulation Act, 1981 governs fishing. Ban period usually June 1 to August 31.',
+    'Gujarat': 'Gujarat Marine Fishing Regulation Act, 2003 applies. Fishing ban from June 1 to August 14.',
+    'Odisha': 'Odisha Marine Fishing Regulation Act, 1982 is applicable. Ban period April 1 to May 31.',
+    'West Bengal': 'West Bengal Marine Fishing Regulation Act, 1993 applies. Fishing restrictions during monsoon season.',
+    'Puducherry': 'Puducherry Marine Fishing Regulation Rules apply similar to Tamil Nadu regulations.',
+  };
+
+  return stateData[state] || `Specific regulations for ${state} should be obtained from the local Department of Fisheries. General Indian fishing laws apply.`;
+};
