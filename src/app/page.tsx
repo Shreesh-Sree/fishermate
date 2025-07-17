@@ -1,9 +1,17 @@
+"use client";
+
 import { Header } from "@/components/Header";
 import { WeatherCard } from "@/components/WeatherCard";
 import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
 import { Chatbot } from "@/components/Chatbot";
-import { MapCard } from "@/components/MapCard";
+import dynamic from 'next/dynamic';
+
+const MapCard = dynamic(() => import('@/components/MapCard').then(mod => mod.MapCard), {
+  ssr: false,
+  loading: () => <div className="h-[448px] w-full rounded-lg border flex items-center justify-center"><p>Loading map...</p></div>
+});
+
 
 export default function Home() {
   return (
