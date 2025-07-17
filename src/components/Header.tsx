@@ -16,18 +16,18 @@ export function Header() {
   const { setLocale, t } = useLanguage();
 
   return (
-    <header className="py-4 px-6 bg-card border-b shadow-sm sticky top-0 z-50">
+    <header className="py-4 px-6 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 border-b shadow-lg sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 text-primary transition-opacity hover:opacity-80">
-          <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+        <Link href="/" className="flex items-center gap-3 text-white transition-all hover:scale-105 animate-fade-in">
+          <div className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-xl border border-white/30 animate-float">
             <Anchor className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-headline font-bold tracking-tight">{t('app_title')}</h1>
+          <h1 className="text-2xl font-headline font-bold tracking-tight animate-shimmer">{t('app_title')}</h1>
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">{/****/}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
                 <Languages className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Select language</span>
               </Button>
@@ -44,7 +44,7 @@ export function Header() {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
                 <Settings className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Settings and Help</span>
               </Button>
@@ -69,6 +69,7 @@ export function Header() {
             variant="outline"
             size="icon"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
           >
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

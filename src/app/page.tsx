@@ -5,7 +5,6 @@ import { WeatherCard } from "@/components/WeatherCard";
 import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
 import { PopupChatbot } from "@/components/PopupChatbot";
-import { MapCard } from "@/components/MapCard";
 import GoogleMapCard from "@/components/GoogleMapCard";
 import FishingAnalyticsCard from "@/components/FishingAnalyticsCard";
 import { useLanguage } from "@/context/LanguageContext";

@@ -54,72 +54,94 @@ export function SafetyTips() {
   }
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2">
-          <Shield className="w-6 h-6 text-primary" />
-          {t('safety_practices_title')}
-        </CardTitle>
-        <CardDescription>{t('safety_practices_description')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="query"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('safety_query_label')}</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder={t('safety_query_placeholder')} {...field} rows={3} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="targetLanguage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('language_label')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('select_language_placeholder')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {indianLanguages.map((lang) => (
-                        <SelectItem key={lang.value} value={lang.value}>
-                          {lang.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90">
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="mr-2 h-4 w-4" />
-              )}
-              {t('get_guidelines_button')}
-            </Button>
-          </form>
-        </Form>
-        {result && (
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Languages size={18}/> {t('translated_query_title')}</h4>
-            <p className="mb-4 text-sm italic">"{result.translation}"</p>
-            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Shield size={18} /> {t('safety_guidelines_title')}</h4>
-            <p className="whitespace-pre-wrap text-sm">{result.safetyGuidelines}</p>
+    <Card className="modern-card animate-fade-in hover-lift">
+      <CardContent className="p-0 h-full">
+        {/* Header with gradient background */}
+        <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white p-4 rounded-t-xl">
+          <div className="flex items-center gap-3">
+            <Shield className="w-6 h-6 text-white animate-float" />
+            <div>
+              <h3 className="text-lg font-bold animate-shimmer">{t('safety_practices_title')}</h3>
+              <p className="text-orange-100 text-sm">{t('safety_practices_description')}</p>
+            </div>
           </div>
-        )}
+        </div>
+        {/* Content Section */}
+        <div className="p-4 space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="query"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('safety_query_label')}</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder={t('safety_query_placeholder')} 
+                        {...field} 
+                        rows={3}
+                        className="resize-none rounded-lg border-gray-200 focus:border-orange-400 focus:ring-orange-400"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="targetLanguage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t('language_label')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-lg border-gray-200 focus:border-orange-400 focus:ring-orange-400">
+                          <SelectValue placeholder={t('select_language_placeholder')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {indianLanguages.map((lang) => (
+                          <SelectItem key={lang.value} value={lang.value}>
+                            {lang.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                disabled={isLoading} 
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg py-2 animate-glow"
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Wand2 className="mr-2 h-4 w-4" />
+                )}
+                {t('get_guidelines_button')}
+              </Button>
+            </form>
+          </Form>
+          
+          {result && (
+            <div className="mt-4 p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border border-orange-100 animate-slide-in-left">
+              <h4 className="font-bold text-orange-800 flex items-center gap-2 mb-2">
+                <Languages className="w-4 h-4" /> 
+                {t('translated_query_title')}
+              </h4>
+              <p className="mb-3 text-sm italic text-orange-700">"{result.translation}"</p>
+              <h4 className="font-bold text-red-800 flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4" /> 
+                {t('safety_guidelines_title')}
+              </h4>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">{result.safetyGuidelines}</p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

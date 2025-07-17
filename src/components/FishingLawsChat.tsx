@@ -162,116 +162,133 @@ export function FishingLawsChat() {
   }
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2">
-          <BookText className="w-6 h-6 text-primary" />
-          {t('fishing_laws_title')}
-        </CardTitle>
-        <CardDescription>{t('fishing_laws_description')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('state_label')}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('select_state_placeholder')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {indianStates.map((state) => (
-                          <SelectItem key={state} value={state}>
-                            {state}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="query"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('question_label')}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder={t('fishing_laws_query_placeholder')} 
-                        {...field}
-                        value={selectedQuestion || field.value}
-                        onChange={(e) => {
-                          setSelectedQuestion("");
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Prebuilt Questions Section */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-muted-foreground">Quick Questions:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {prebuiltQuestions.map((question, index) => (
-                  <Badge
-                    key={index}
-                    variant={selectedQuestion === question ? "default" : "secondary"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors text-xs px-2 py-1"
-                    onClick={() => handleQuestionSelect(question)}
-                  >
-                    {question}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <Button type="submit" disabled={isLoading || !form.watch("state") || !form.watch("query")?.trim()} className="w-full">
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="mr-2 h-4 w-4" />
-              )}
-              {t('get_summary_button')}
-            </Button>
-          </form>
-        </Form>
-        {isLoading && (
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg flex items-center justify-center">
-              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-              <p>{t('fetching_summary')}...</p>
-            </div>
-        )}
-        {result && !isLoading && (
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold font-headline text-primary">{t('ai_summary_title')}</h4>
-              {result.audio && (
-                <Button variant="outline" size="icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause audio' : 'Play audio'}>
-                  {isPlaying ? <Pause className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </Button>
-              )}
-            </div>
-            <div className="prose prose-sm max-w-none">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">{result.summary}</p>
+    <Card className="modern-card animate-fade-in hover-lift">
+      <CardContent className="p-0 h-full">
+        {/* Header with gradient background */}
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-t-xl">
+          <div className="flex items-center gap-3">
+            <BookText className="w-6 h-6 text-white animate-float" />
+            <div>
+              <h3 className="text-lg font-bold animate-shimmer">{t('fishing_laws_title')}</h3>
+              <p className="text-blue-100 text-sm">{t('fishing_laws_description')}</p>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Content Section */}
+        <div className="p-4 space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('state_label')}</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-lg border-gray-200 focus:border-blue-400 focus:ring-blue-400">
+                            <SelectValue placeholder={t('select_state_placeholder')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {indianStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="query"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">{t('question_label')}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder={t('fishing_laws_query_placeholder')} 
+                          {...field}
+                          value={selectedQuestion || field.value}
+                          onChange={(e) => {
+                            setSelectedQuestion("");
+                            field.onChange(e);
+                          }}
+                          className="rounded-lg border-gray-200 focus:border-blue-400 focus:ring-blue-400"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Prebuilt Questions Section */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-600">Quick Questions:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {prebuiltQuestions.map((question, index) => (
+                    <Badge
+                      key={index}
+                      variant={selectedQuestion === question ? "default" : "secondary"}
+                      className="cursor-pointer hover:bg-blue-600 hover:text-white transition-colors text-xs px-2 py-1 bg-blue-100 text-blue-800"
+                      onClick={() => handleQuestionSelect(question)}
+                    >
+                      {question}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                disabled={isLoading || !form.watch("state") || !form.watch("query")?.trim()} 
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg py-2 animate-glow"
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="mr-2 h-4 w-4" />
+                )}
+                {t('get_summary_button')}
+              </Button>
+            </form>
+          </Form>
+          
+          {isLoading && (
+              <div className="mt-4 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center border border-blue-100">
+                <Loader2 className="mr-2 h-6 w-6 animate-spin text-blue-600" />
+                <p className="text-blue-700">{t('fetching_summary')}...</p>
+              </div>
+          )}
+          
+          {result && !isLoading && (
+            <div className="mt-4 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 animate-slide-in-right">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold text-blue-800 flex items-center gap-2">
+                  <BookText className="w-4 h-4" />
+                  {t('ai_summary_title')}
+                </h4>
+                {result.audio && (
+                  <Button variant="outline" size="icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause audio' : 'Play audio'} className="border-blue-200 hover:bg-blue-50">
+                    {isPlaying ? <Pause className="h-4 w-4 text-blue-600" /> : <Volume2 className="h-4 w-4 text-blue-600" />}
+                  </Button>
+                )}
+              </div>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{result.summary}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
