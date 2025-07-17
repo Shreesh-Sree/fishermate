@@ -22,7 +22,7 @@ L.Icon.Default.mergeOptions({
 });
 
 
-export function MapCard() {
+function MapCard() {
     const [isMounted, setIsMounted] = useState(false);
     const position: [number, number] = [16.506, 80.648];
 
