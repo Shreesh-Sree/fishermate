@@ -4,7 +4,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchWeatherApi } from 'openmeteo';
@@ -71,6 +73,41 @@ const formatTime = (timestamp: number): string => {
     minute: '2-digit', 
     hour12: false 
   });
+};
+
+const getFishingRecommendation = (weatherData: WeatherData['current']) => {
+  const { wind, condition, temp, visibility } = weatherData;
+  
+  // Poor conditions
+  if (wind > 25 || visibility < 2 || condition.toLowerCase().includes('storm') || condition.toLowerCase().includes('thunder')) {
+    return {
+      status: 'dangerous',
+      icon: AlertCircle,
+      message: 'Not safe for fishing',
+      details: 'High winds, poor visibility, or severe weather detected. Stay on shore.',
+      color: 'destructive'
+    };
+  }
+  
+  // Moderate conditions
+  if (wind > 15 || visibility < 5 || temp < 5 || temp > 40) {
+    return {
+      status: 'caution',
+      icon: AlertTriangle,
+      message: 'Fish with caution',
+      details: 'Moderate winds or visibility issues. Stay close to shore and monitor conditions.',
+      color: 'warning'
+    };
+  }
+  
+  // Good conditions
+  return {
+    status: 'good',
+    icon: CheckCircle,
+    message: 'Good for fishing',
+    details: 'Favorable weather conditions. Good visibility and manageable winds.',
+    color: 'success'
+  };
 };
 
 
@@ -202,6 +239,7 @@ export function WeatherCard() {
     }
     
     const { current } = weatherData;
+    const fishingRec = getFishingRecommendation(current);
 
     return (
       <>
@@ -215,6 +253,31 @@ export function WeatherCard() {
             </div>
           </div>
         </div>
+
+        {/* Fishing Recommendation Alert */}
+        <Alert className={`my-4 border-l-4 ${
+          fishingRec.status === 'dangerous' ? 'border-red-500 bg-red-50 dark:bg-red-950' :
+          fishingRec.status === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950' :
+          'border-green-500 bg-green-50 dark:bg-green-950'
+        }`}>
+          <fishingRec.icon className={`h-4 w-4 ${
+            fishingRec.status === 'dangerous' ? 'text-red-600' :
+            fishingRec.status === 'caution' ? 'text-yellow-600' :
+            'text-green-600'
+          }`} />
+          <AlertDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold">{fishingRec.message}</p>
+                <p className="text-sm text-muted-foreground">{fishingRec.details}</p>
+              </div>
+              <Badge variant={fishingRec.status === 'good' ? 'default' : 'secondary'} className="ml-2">
+                <Clock className="w-3 h-3 mr-1" />
+                {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+              </Badge>
+            </div>
+          </AlertDescription>
+        </Alert>
         
         <Separator className="my-4" />
         

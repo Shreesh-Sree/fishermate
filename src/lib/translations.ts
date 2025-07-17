@@ -23,6 +23,19 @@ const en = {
   translated_query_title: "Translated Query",
   safety_guidelines_title: "Safety Guidelines",
   fetching_summary: "Fetching summary",
+  fishing_recommendation: "Fishing Recommendation",
+  last_updated: "Last updated",
+  map_title: "Interactive Map",
+  about_app: "About FisherMate.AI",
+  help_support: "Help & Support",
+  your_location: "Your Location",
+  fishing_spots_nearby: "fishing-related locations nearby",
+  getting_location: "Getting your location...",
+  location_access_help: "Please allow location access for nearby fishing spots.",
+  your_location: "Your Location",
+  fishing_spots_nearby: "fishing-related locations nearby",
+  getting_location: "Getting your location...",
+  location_access_help: "Please allow location access for nearby fishing spots.",
 };
 
 const ta = {
@@ -49,6 +62,15 @@ const ta = {
   translated_query_title: "மொழிபெயர்க்கப்பட்ட கேள்வி",
   safety_guidelines_title: "பாதுகாப்பு வழிகாட்டுதல்கள்",
   fetching_summary: "சுருக்கம் எடுக்கப்படுகிறது",
+  fishing_recommendation: "மீன்பிடி பரிந்துரை",
+  last_updated: "கடைசியாக புதுப்பிக்கப்பட்டது",
+  map_title: "ஊடாடும் வரைபடம்",
+  about_app: "FisherMate.AI பற்றி",
+  help_support: "உதவி மற்றும் ஆதரவு",
+  your_location: "உங்கள் இடம்",
+  fishing_spots_nearby: "மீன்பிடி தொடர்பான இடங்கள் அருகில்",
+  getting_location: "உங்கள் இருப்பிடத்தைப் பெறுகிறது...",
+  location_access_help: "அருகிலுள்ள மீன்பிடி இடங்களுக்கு இருப்பிட அணுகலை அனுமதிக்கவும்",
 };
 
 export const translations = { en, ta };

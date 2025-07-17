@@ -1,4 +1,4 @@
-import { Anchor, Languages, Moon, Sun } from 'lucide-react';
+import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,13 +34,37 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setLocale('en')}>
-                English
+                🇺🇸 English
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setLocale('ta')}>
-                Tamil (தமிழ்)
+                🇮🇳 Tamil (தமிழ்)
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Settings className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Settings and Help</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Info className="mr-2 h-4 w-4" />
+                About FisherMate.AI
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Help & Support
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <span className="text-sm text-muted-foreground">Version 1.0.0</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Button
             variant="outline"
             size="icon"
