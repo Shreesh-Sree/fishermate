@@ -362,155 +362,170 @@ const FishingAnalyticsCard = () => {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Fish className="w-5 h-5" />
-          Fishing Analytics
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Fishing Score */}
-        <div className={`p-4 rounded-lg border-2 ${getScoreColor(analytics.fishingScore.overall)}`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              {getScoreIcon(analytics.fishingScore.overall)}
-              <span className="font-semibold">Fishing Score</span>
+    <Card className="modern-card animate-fade-in hover-lift">
+      <CardContent className="p-0 h-full">
+        {/* Header with gradient */}
+        <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white p-4 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold animate-shimmer">Fishing Analytics</h3>
+              <p className="text-emerald-100 text-xs">Real-time conditions</p>
             </div>
-            <span className="text-2xl font-bold">{analytics.fishingScore.overall}/100</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex justify-between">
-              <span>Weather:</span>
-              <span className="font-medium">{analytics.fishingScore.factors.weather}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Tides:</span>
-              <span className="font-medium">{analytics.fishingScore.factors.tides}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Moon:</span>
-              <span className="font-medium">{analytics.fishingScore.factors.moonPhase}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Time:</span>
-              <span className="font-medium">{analytics.fishingScore.factors.time}%</span>
-            </div>
+            <Fish className="w-8 h-8 text-white animate-float" />
           </div>
         </div>
 
-        {/* Solar, Tide, and Moon Information */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Sun className="w-4 h-4 text-yellow-500" />
-              Solar Data
-            </h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Sunrise:</span>
-                <span className="font-medium">{analytics.solarData.sunrise}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Sunset:</span>
-                <span className="font-medium">{analytics.solarData.sunset}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Day Length:</span>
-                <span className="font-medium">{analytics.solarData.dayLength}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">UV Index:</span>
-                <Badge variant={analytics.solarData.uvIndex > 7 ? "destructive" : analytics.solarData.uvIndex > 3 ? "secondary" : "outline"}>
-                  {analytics.solarData.uvIndex}
-                </Badge>
-              </div>
+        {/* Fishing Score Display */}
+        <div className="p-4 text-center border-b border-gray-100">
+          <div className="relative inline-block">
+            <div className="text-4xl font-bold text-emerald-600 animate-pulse-slow">
+              {analytics.fishingScore.overall}/100
+            </div>
+            <div className="text-sm text-gray-600 mt-1">Fishing Score</div>
+            
+            {/* Circular progress indicator */}
+            <div className="absolute -inset-3 rounded-full border-4 border-emerald-200">
+              <div 
+                className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"
+                style={{ animationDuration: '3s' }}
+              ></div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Waves className="w-4 h-4 text-blue-500" />
-              Tide Data
-            </h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">High Tide:</span>
-                <span className="font-medium">{analytics.tideData.highTide}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Low Tide:</span>
-                <span className="font-medium">{analytics.tideData.lowTide}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Current:</span>
-                <Badge variant={analytics.tideData.currentTide === 'rising' ? "default" : "secondary"}>
-                  {analytics.tideData.currentTide}
-                </Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Height:</span>
-                <span className="font-medium">{analytics.tideData.tideHeight.toFixed(1)}m</span>
-              </div>
-            </div>
+          {/* Score breakdown badges */}
+          <div className="flex justify-center gap-2 mt-4 flex-wrap">
+            <Badge variant="outline" className="text-xs animate-glow">
+              Weather: {analytics.fishingScore.factors.weather}%
+            </Badge>
+            <Badge variant="outline" className="text-xs animate-glow">
+              Tides: {analytics.fishingScore.factors.tides}%
+            </Badge>
+            <Badge variant="outline" className="text-xs animate-glow">
+              Moon: {analytics.fishingScore.factors.moonPhase}%
+            </Badge>
           </div>
+        </div>
 
-          <div className="space-y-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Moon className="w-4 h-4 text-purple-500" />
-              Moon Phase
-            </h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Phase:</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-lg">{analytics.moonPhase.icon}</span>
-                  <span className="font-medium">{analytics.moonPhase.phase}</span>
+        {/* Analytics Grid */}
+        <div className="p-4 space-y-4">
+          {/* Solar & Tide Info */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Solar Panel */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-3 rounded-lg border border-yellow-100 hover-glow transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <Sun className="w-4 h-4 text-yellow-600" />
+                <span className="text-xs font-medium text-yellow-800">Solar</span>
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-yellow-600">Sunrise:</span>
+                  <span className="font-semibold text-yellow-900">{analytics.solarData.sunrise}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-yellow-600">Sunset:</span>
+                  <span className="font-semibold text-yellow-900">{analytics.solarData.sunset}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-yellow-600">UV Index:</span>
+                  <Badge variant={analytics.solarData.uvIndex > 6 ? 'destructive' : 'default'} className="text-xs">
+                    {analytics.solarData.uvIndex}
+                  </Badge>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Illumination:</span>
-                <span className="font-medium">{analytics.moonPhase.illumination}%</span>
+            </div>
+
+            {/* Tide Panel */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-3 rounded-lg border border-blue-100 hover-glow transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <Waves className="w-4 h-4 text-blue-600" />
+                <span className="text-xs font-medium text-blue-800">Tides</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-blue-600">High:</span>
+                  <span className="font-semibold text-blue-900">{analytics.tideData.highTide}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-600">Low:</span>
+                  <span className="font-semibold text-blue-900">{analytics.tideData.lowTide}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-600">Status:</span>
+                  <div className="flex items-center gap-1">
+                    {analytics.tideData.currentTide === 'rising' ? 
+                      <TrendingUp className="w-3 h-3 text-green-500" /> : 
+                      <TrendingDown className="w-3 h-3 text-red-500" />
+                    }
+                    <span className="font-semibold text-blue-900 capitalize">
+                      {analytics.tideData.currentTide}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Moon Phase Section */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-3 rounded-lg border border-purple-100 animate-slide-in-left">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Moon className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-medium text-purple-800">Moon Phase</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-lg animate-float">{analytics.moonPhase.icon}</span>
+                <span className="text-xs font-semibold text-purple-900">{analytics.moonPhase.phase}</span>
+              </div>
+            </div>
+            
+            {/* Moon illumination progress bar */}
+            <div className="relative">
+              <div className="w-full bg-purple-200 rounded-full h-2">
                 <div 
-                  className="bg-purple-500 h-2 rounded-full transition-all duration-300" 
+                  className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-1000 animate-shimmer" 
                   style={{ width: `${analytics.moonPhase.illumination}%` }}
                 ></div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recommendations */}
-        <div>
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            <Compass className="w-4 h-4 text-indigo-500" />
-            Today's Fishing Recommendations
-          </h4>
-          <div className="space-y-2">
-            {analytics.recommendations.map((rec, index) => (
-              <div key={index} className="p-3 bg-blue-50 rounded-lg text-sm border-l-4 border-blue-400 hover:bg-blue-100 transition-colors">
-                {rec}
+              <div className="text-xs text-purple-600 mt-1 text-center">
+                {analytics.moonPhase.illumination}% illuminated
               </div>
-            ))}
+            </div>
           </div>
-        </div>
 
-        {/* Quick Stats */}
-        <div className="pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-center gap-6 text-center">
-            <div>
-              <div className="text-lg font-bold text-blue-600">{new Date().toLocaleDateString()}</div>
-              <div className="text-xs text-gray-500">Today</div>
+          {/* Recommendations Section */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Compass className="w-4 h-4 text-indigo-600" />
+              <span className="text-sm font-medium text-indigo-800">Today's Tips</span>
             </div>
-            <div>
-              <div className="text-lg font-bold text-green-600">{analytics.fishingScore.overall}%</div>
-              <div className="text-xs text-gray-500">Success Rate</div>
+            <div className="space-y-2">
+              {analytics.recommendations.slice(0, 2).map((rec, index) => (
+                <div 
+                  key={index} 
+                  className="p-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg text-xs border-l-4 border-indigo-400 hover-glow transition-all duration-300"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {rec}
+                </div>
+              ))}
             </div>
-            <div>
-              <div className="text-lg font-bold text-purple-600">{analytics.moonPhase.illumination}%</div>
-              <div className="text-xs text-gray-500">Moon Visibility</div>
+          </div>
+
+          {/* Quick Stats Footer */}
+          <div className="pt-3 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
+                <div className="text-sm font-bold text-blue-600">{new Date().getDate()}</div>
+                <div className="text-xs text-gray-500">Today</div>
+              </div>
+              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
+                <div className="text-sm font-bold text-green-600">{analytics.solarData.dayLength}</div>
+                <div className="text-xs text-gray-500">Daylight</div>
+              </div>
+              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
+                <div className="text-sm font-bold text-purple-600">{analytics.tideData.tideHeight.toFixed(1)}m</div>
+                <div className="text-xs text-gray-500">Tide Height</div>
+              </div>
             </div>
           </div>
         </div>
