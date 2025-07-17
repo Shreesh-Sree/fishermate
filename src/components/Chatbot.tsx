@@ -54,7 +54,7 @@ export function Chatbot() {
     try {
       const response = await handleChat({
         message: values.message,
-        history: newMessages.slice(0, -1), // Send all messages except the current one
+        history: newMessages, // Send all messages
       });
 
       const modelMessage: Message = { role: "model", content: response.content };
@@ -80,7 +80,7 @@ export function Chatbot() {
         </CardTitle>
         <CardDescription>Ask me anything!</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-0">
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
           <div className="p-4 space-y-4">
              {messages.length === 0 && (
