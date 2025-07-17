@@ -310,9 +310,9 @@ const FishingAnalyticsCard = () => {
     return recommendations;
   };
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-red-600 bg-red-50 border-red-200';
+    if (score >= 80) return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700';
+    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700';
+    return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700';
   };
 
   const getScoreIcon = (score: number) => {
@@ -337,7 +337,7 @@ const FishingAnalyticsCard = () => {
     if (error || !analytics) {
       return (
         <div className="flex items-center justify-center h-full">
-          <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+          <div className="text-center p-4 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-700">
             <Activity className="w-12 h-12 mb-4 mx-auto text-red-500" />
             <p className="font-bold text-red-700">Analytics Error</p>
             <p className="text-sm text-red-600">{error || 'Could not load analytics.'}</p>
@@ -353,7 +353,7 @@ const FishingAnalyticsCard = () => {
       <div className="p-4 space-y-4">
         {/* Overall Score */}
         <div className="text-center">
-          <div className={`relative w-32 h-32 mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 shadow-inner`}>
+          <div className={`relative w-32 h-32 mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-inner`}>
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
             <div 
               className="absolute inset-0 rounded-full"
@@ -361,7 +361,7 @@ const FishingAnalyticsCard = () => {
                 background: `conic-gradient(${scoreColor.replace('text-', '').replace('-500', '')} ${fishingScore.overall * 3.6}deg, #e5e7eb 0deg)`
               }}
             ></div>
-            <div className="relative z-10 bg-white w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-md">
+            <div className="relative z-10 bg-white dark:bg-gray-800 w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-md">
               <p className={`text-4xl font-bold ${scoreColor}`}>{fishingScore.overall}</p>
               <p className="text-xs text-gray-500">Fishing Score</p>
             </div>
@@ -369,7 +369,7 @@ const FishingAnalyticsCard = () => {
         </div>
 
         {/* Recommendations */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg border border-green-100 dark:border-green-700">
           <h4 className="text-sm font-bold text-green-800 mb-2">Top Recommendations</h4>
           <ul className="space-y-1 text-xs text-green-700">
             {recommendations.slice(0, 2).map((rec, i) => (
@@ -384,19 +384,19 @@ const FishingAnalyticsCard = () => {
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-3 gap-3 text-center">
           {/* Solar */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-2 rounded-lg border border-yellow-100">
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-2 rounded-lg border border-yellow-100 dark:border-yellow-700">
             <Sun className="w-5 h-5 mx-auto text-yellow-600 mb-1" />
             <p className="text-xs font-medium text-yellow-800">Sunrise</p>
             <p className="text-sm font-bold text-yellow-900">{solarData.sunrise}</p>
           </div>
           {/* Tides */}
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-lg border border-blue-100">
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-700">
             <Waves className="w-5 h-5 mx-auto text-blue-600 mb-1" />
             <p className="text-xs font-medium text-blue-800">High Tide</p>
             <p className="text-sm font-bold text-blue-900">{tideData.highTide}</p>
           </div>
           {/* Moon */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-2 rounded-lg border border-indigo-100">
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-2 rounded-lg border border-indigo-100 dark:border-indigo-700">
             <Moon className="w-5 h-5 mx-auto text-indigo-600 mb-1" />
             <p className="text-xs font-medium text-indigo-800">Moon</p>
             <p className="text-sm font-bold text-indigo-900">{moonPhase.phase}</p>
@@ -408,7 +408,7 @@ const FishingAnalyticsCard = () => {
 
   return (
     <Card className="modern-card animate-fade-in hover-lift">
-      <CardHeader className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white p-4 rounded-t-xl">
+      <CardHeader className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 dark:from-green-700 dark:via-emerald-700 dark:to-teal-700 text-white p-4 rounded-t-xl">
         <div className="flex items-center gap-3">
           <Activity className="w-6 h-6 text-white animate-float" />
           <div>

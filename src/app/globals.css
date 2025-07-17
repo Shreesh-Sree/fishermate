@@ -70,6 +70,10 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  html {
     transition: background-color 0.3s ease;
   }
 }
@@ -222,4 +226,37 @@
 /* Text Gradients */
 .text-gradient {
   @apply bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent;
+}
+
+/* Dark mode specific enhancements */
+.dark {
+  color-scheme: dark;
+}
+
+/* Smooth transitions for all theme changes */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Leaflet dark mode support */
+.dark .leaflet-popup-content-wrapper {
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+}
+
+.dark .leaflet-popup-tip {
+  background: hsl(var(--popover));
+}
+
+.dark .leaflet-control {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.dark .leaflet-control a {
+  color: hsl(var(--foreground));
+}
+
+.dark .leaflet-control a:hover {
+  background: hsl(var(--muted));
 }
