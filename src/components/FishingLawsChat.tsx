@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { indianStates } from "@/lib/data";
 import { handleFishingLaws } from "@/app/actions";
 import type { SummarizeFishingLawsOutput } from "@/ai/flows/summarize-fishing-laws";
+import { useLanguage } from "@/context/LanguageContext";
 
 const fishingLawsSchema = z.object({
   query: z.string().min(10, { message: "Please enter a specific question." }),
@@ -22,6 +23,7 @@ const fishingLawsSchema = z.object({
 });
 
 export function FishingLawsChat() {
+  const { t } = useLanguage();
   const [result, setResult] = useState<SummarizeFishingLawsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -93,9 +95,9 @@ export function FishingLawsChat() {
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <BookText className="w-6 h-6 text-primary" />
-          Fishing Laws Information
+          {t('fishing_laws_title')}
         </CardTitle>
-        <CardDescription>Ask questions about fishing regulations in your state.</CardDescription>
+        <CardDescription>{t('fishing_laws_description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -106,11 +108,11 @@ export function FishingLawsChat() {
                 name="state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
+                    <FormLabel>{t('state_label')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a state" />
+                          <SelectValue placeholder={t('select_state_placeholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -130,9 +132,9 @@ export function FishingLawsChat() {
                 name="query"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Question</FormLabel>
+                    <FormLabel>{t('question_label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., When is the seasonal ban?" {...field} />
+                      <Input placeholder={t('fishing_laws_query_placeholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,14 +147,14 @@ export function FishingLawsChat() {
               ) : (
                 <Search className="mr-2 h-4 w-4" />
               )}
-              Get Summary
+              {t('get_summary_button')}
             </Button>
           </form>
         </Form>
         {result && (
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
             <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold font-headline text-primary">AI-Generated Summary</h4>
+              <h4 className="font-bold font-headline text-primary">{t('ai_summary_title')}</h4>
               {result.audio && (
                 <Button variant="outline" size="icon" onClick={togglePlay} aria-label={isPlaying ? 'Pause audio' : 'Play audio'}>
                   {isPlaying ? <Pause className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}

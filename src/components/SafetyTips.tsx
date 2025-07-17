@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { indianLanguages } from "@/lib/data";
 import { handleSafetyTips } from "@/app/actions";
 import type { TranslateSafetyPracticesOutput } from "@/ai/flows/translate-safety-practices";
+import { useLanguage } from "@/context/LanguageContext";
 
 const safetyTipsSchema = z.object({
   query: z.string().min(10, { message: "Please enter a more detailed query." }),
@@ -22,6 +23,7 @@ const safetyTipsSchema = z.object({
 });
 
 export function SafetyTips() {
+  const { t } = useLanguage();
   const [result, setResult] = useState<TranslateSafetyPracticesOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -56,9 +58,9 @@ export function SafetyTips() {
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Shield className="w-6 h-6 text-primary" />
-          Safety Practices
+          {t('safety_practices_title')}
         </CardTitle>
-        <CardDescription>Get safety guidelines in your local language.</CardDescription>
+        <CardDescription>{t('safety_practices_description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -68,9 +70,9 @@ export function SafetyTips() {
               name="query"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Safety Query</FormLabel>
+                  <FormLabel>{t('safety_query_label')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., What to do if the boat engine fails?" {...field} rows={3} />
+                    <Textarea placeholder={t('safety_query_placeholder')} {...field} rows={3} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,11 +83,11 @@ export function SafetyTips() {
               name="targetLanguage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Language</FormLabel>
+                  <FormLabel>{t('language_label')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a language" />
+                        <SelectValue placeholder={t('select_language_placeholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -106,15 +108,15 @@ export function SafetyTips() {
               ) : (
                 <Wand2 className="mr-2 h-4 w-4" />
               )}
-              Get Guidelines
+              {t('get_guidelines_button')}
             </Button>
           </form>
         </Form>
         {result && (
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Languages size={18}/> Translated Query</h4>
+            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Languages size={18}/> {t('translated_query_title')}</h4>
             <p className="mb-4 text-sm italic">"{result.translation}"</p>
-            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Shield size={18} /> Safety Guidelines</h4>
+            <h4 className="font-bold font-headline text-primary flex items-center gap-2 mb-2"><Shield size={18} /> {t('safety_guidelines_title')}</h4>
             <p className="whitespace-pre-wrap text-sm">{result.safetyGuidelines}</p>
           </div>
         )}

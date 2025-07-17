@@ -1,0 +1,53 @@
+
+const en = {
+  app_title: "SeaGuide AI",
+  home_title: "Your AI Guide on the High Seas",
+  home_subtitle: "Instant, multilingual information on fishing laws, safety practices, and real-time weather alerts, designed for fisherfolk communities.",
+  weather_title: "Real-time Weather",
+  forecast_title: "5-Day Forecast",
+  fishing_laws_title: "Fishing Laws Information",
+  fishing_laws_description: "Ask questions about fishing regulations in your state.",
+  state_label: "State",
+  select_state_placeholder: "Select a state",
+  question_label: "Question",
+  fishing_laws_query_placeholder: "e.g., When is the seasonal ban?",
+  get_summary_button: "Get Summary",
+  ai_summary_title: "AI-Generated Summary",
+  safety_practices_title: "Safety Practices",
+  safety_practices_description: "Get safety guidelines in your local language.",
+  safety_query_label: "Safety Query",
+  safety_query_placeholder: "e.g., What to do if the boat engine fails?",
+  language_label: "Language",
+  select_language_placeholder: "Select a language",
+  get_guidelines_button: "Get Guidelines",
+  translated_query_title: "Translated Query",
+  safety_guidelines_title: "Safety Guidelines",
+};
+
+const ta = {
+  app_title: "கடல் வழிகாட்டி AI",
+  home_title: "கடலில் உங்கள் AI வழிகாட்டி",
+  home_subtitle: "மீனவ சமூகங்களுக்காக வடிவமைக்கப்பட்ட, மீன்பிடி சட்டங்கள், பாதுகாப்பு நடைமுறைகள் மற்றும் நிகழ்நேர வானிலை எச்சரிக்கைகள் பற்றிய உடனடி, பன்மொழித் தகவல்.",
+  weather_title: "நிகழ்நேர வானிலை",
+  forecast_title: "5-நாள் முன்னறிவிப்பு",
+  fishing_laws_title: "மீன்பிடி சட்டத் தகவல்",
+  fishing_laws_description: "உங்கள் மாநிலத்தில் உள்ள மீன்பிடி விதிமுறைகள் பற்றி கேள்விகளைக் கேளுங்கள்.",
+  state_label: "மாநிலம்",
+  select_state_placeholder: "ஒரு மாநிலத்தைத் தேர்ந்தெடுக்கவும்",
+  question_label: "கேள்வி",
+  fishing_laws_query_placeholder: "எ.கா., பருவகாலத் தடை எப்போது?",
+  get_summary_button: "சுருக்கத்தைப் பெறுங்கள்",
+  ai_summary_title: "AI-உருவாக்கிய சுருக்கம்",
+  safety_practices_title: "பாதுகாப்பு நடைமுறைகள்",
+  safety_practices_description: "உங்கள் உள்ளூர் மொழியில் பாதுகாப்பு வழிகாட்டுதல்களைப் பெறுங்கள்.",
+  safety_query_label: "பாதுகாப்பு கேள்வி",
+  safety_query_placeholder: "எ.கா., படகு இயந்திரம் பழுதடைந்தால் என்ன செய்வது?",
+  language_label: "மொழி",
+  select_language_placeholder: "ஒரு மொழியைத் தேர்ந்தெடுக்கவும்",
+  get_guidelines_button: "வழிகாட்டுதல்களைப் பெறுங்கள்",
+  translated_query_title: "மொழிபெயர்க்கப்பட்ட கேள்வி",
+  safety_guidelines_title: "பாதுகாப்பு வழிகாட்டுதல்கள்",
+};
+
+export const translations = { en, ta };
+export type TranslationKey = keyof typeof en;

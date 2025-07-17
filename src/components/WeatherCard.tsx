@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 type WeatherData = {
   current: {
@@ -34,14 +35,15 @@ const weatherIconMap: { [key: string]: LucideIcon } = {
   "50d": Wind, "50n": Wind,
 };
 
-const getDayOfWeek = (dateString: string) => {
+const getDayOfWeek = (dateString: string, locale: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { weekday: 'short' });
+  return date.toLocaleDateString(locale, { weekday: 'short' });
 };
 
 const apiKey = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
 
 export function WeatherCard() {
+  const { locale, t } = useLanguage();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export function WeatherCard() {
           .filter((item: any, index: number) => index % 8 === 0)
           .slice(0, 5)
           .map((item: any) => ({
-            day: getDayOfWeek(item.dt_txt),
+            day: getDayOfWeek(item.dt_txt, locale),
             temp: Math.round(item.main.temp),
             icon: weatherIconMap[item.weather[0].icon] || Sun,
           }));
@@ -125,7 +127,7 @@ export function WeatherCard() {
     }
 
     fetchWeather();
-  }, [coords]);
+  }, [coords, locale]);
 
   const renderContent = () => {
     if (loading) {
@@ -172,7 +174,7 @@ export function WeatherCard() {
         </div>
         <Separator className="my-6" />
         <div>
-          <h3 className="text-center font-bold mb-4">5-Day Forecast</h3>
+          <h3 className="text-center font-bold mb-4">{t('forecast_title')}</h3>
           <div className="flex justify-between">
             {forecast.map((day) => (
               <div key={day.day} className="flex flex-col items-center gap-2 text-sm">
@@ -192,7 +194,7 @@ export function WeatherCard() {
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Navigation className="w-6 h-6 text-primary" />
-          Real-time Weather
+          {t('weather_title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
