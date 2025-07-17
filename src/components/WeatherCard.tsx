@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -71,16 +72,16 @@ export function WeatherCard() {
   }, []);
 
   useEffect(() => {
-    async function fetchWeather() {
+    async function fetchWeather(isInitialLoad = false) {
       if (!coords) return;
 
       if (!apiKey) {
         setError("OpenWeatherMap API key is missing.");
-        setLoading(false);
+        if (isInitialLoad) setLoading(false);
         return;
       }
 
-      setLoading(true);
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       const { lat, lon } = coords;
@@ -122,11 +123,16 @@ export function WeatherCard() {
             setError("An unknown error occurred.");
         }
       } finally {
-        setLoading(false);
+        if (isInitialLoad) setLoading(false);
       }
     }
+    
+    if (coords) {
+      fetchWeather(true); // Initial fetch
+      const intervalId = setInterval(() => fetchWeather(false), 300000); // Refresh every 5 minutes
 
-    fetchWeather();
+      return () => clearInterval(intervalId); // Cleanup on component unmount
+    }
   }, [coords, locale]);
 
   const renderContent = () => {
