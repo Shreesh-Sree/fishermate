@@ -10,7 +10,9 @@ import {
   type SummarizeFishingLawsInput,
   type SummarizeFishingLawsOutput,
 } from "@/ai/flows/summarize-fishing-laws";
+import { chat } from "@/ai/flows/chatbot-flow";
 import { z } from "zod";
+import { ChatInputSchema, type ChatInput, type ChatOutput } from "@/ai/types";
 
 const safetyTipsSchema = z.object({
   query: z.string(),
@@ -35,5 +37,11 @@ export async function handleFishingLaws(
 ): Promise<SummarizeFishingLawsOutput> {
   const validatedData = fishingLawsSchema.parse(data);
   const result = await summarizeFishingLaws(validatedData);
+  return result;
+}
+
+export async function handleChat(data: ChatInput): Promise<ChatOutput> {
+  const validatedData = ChatInputSchema.parse(data);
+  const result = await chat(validatedData);
   return result;
 }
