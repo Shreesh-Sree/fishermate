@@ -11,9 +11,9 @@ const containerStyle = {
   borderRadius: '0.5rem',
 };
 
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
 export function MapCard() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey || ""
@@ -30,7 +30,7 @@ export function MapCard() {
         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
           <AlertTriangle className="w-12 h-12 mb-4 text-destructive" />
           <p className="font-bold">Google Maps API Key Missing</p>
-          <p className="text-sm">Please add your key to the `.env.local` file.</p>
+          <p className="text-sm">Please add your key to the `.env` file.</p>
         </div>
       );
     }
