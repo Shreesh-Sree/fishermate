@@ -32,7 +32,11 @@ const summarizeFishingLawsPrompt = ai.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
   output: {schema: z.string()},
-  prompt: `You are an expert in Indian fishing laws. Summarize the fishing laws for the state of {{state}} in response to the following query: {{query}}.`,
+  prompt: `You are an expert on Indian fishing laws. Provide a concise summary of the fishing laws for the state of {{state}} based on the following query:
+
+Query: "{{query}}"
+
+Your response should directly address the user's query and be a clear, easy-to-understand summary.`,
 });
 
 async function toWav(
@@ -70,6 +74,8 @@ const summarizeFishingLawsFlow = ai.defineFlow(
   },
   async input => {
     const {output: summary} = await summarizeFishingLawsPrompt(input);
+    const validSummary = summary ?? "I'm sorry, I was unable to generate a summary for your query. Please try again with a different question.";
+
 
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
@@ -81,7 +87,7 @@ const summarizeFishingLawsFlow = ai.defineFlow(
           },
         },
       },
-      prompt: summary!,
+      prompt: validSummary,
     });
 
     if (!media) {
@@ -95,6 +101,6 @@ const summarizeFishingLawsFlow = ai.defineFlow(
 
     const audio = 'data:audio/wav;base64,' + (await toWav(audioBuffer));
 
-    return {summary: summary!, audio};
+    return {summary: validSummary, audio};
   }
 );
