@@ -15,14 +15,14 @@ export function MapCard() {
            <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
                     <MapIcon className="w-6 h-6 text-primary" />
-                    Map
+                    Map (Demo)
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="h-[400px] w-full rounded-lg border bg-muted flex flex-col items-center justify-center text-center p-4">
-                  <AlertTriangle className="w-12 h-12 mb-4 text-destructive" />
-                  <p className="font-bold">Google Maps API Key Missing</p>
-                  <p className="text-sm text-muted-foreground">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.</p>
+                  <MapIcon className="w-12 h-12 mb-4 text-muted-foreground" />
+                  <p className="font-bold">Map is in Demo Mode</p>
+                  <p className="text-sm text-muted-foreground">Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file to enable the interactive map.</p>
                 </div>
             </CardContent>
         </Card>
