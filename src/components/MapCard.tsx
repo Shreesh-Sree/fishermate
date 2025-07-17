@@ -3,11 +3,54 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Map as MapIcon, AlertTriangle, MapPin, Anchor, Fish, Shield, Loader2, Navigation } from "lucide-react";
-import { APIProvider, Map, Marker, InfoWindow } from '@vis.gl/react-google-maps';
+import dynamic from 'next/dynamic';
 import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
-const apiKey = NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+// Dynamically import Leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Custom CSS for markers
+const markerStyles = `
+  .custom-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+  .user-location-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+  }
+  .leaflet-popup-tip {
+    background: white;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = markerStyles;
+  document.head.appendChild(styleSheet);
+}
+
+// Fix for default markers in Leaflet
+if (typeof window !== 'undefined') {
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  });
+}
 
 type FishingPOI = {
   id: string;
@@ -86,14 +129,87 @@ const generateFishingPOIs = (userLat: number, userLng: number): FishingPOI[] => 
 };
 
 const getMarkerIcon = (type: FishingPOI['type']) => {
+  const iconHtml = (emoji: string) => `
+    <div style="
+      background: white;
+      border: 2px solid #3b82f6;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    ">${emoji}</div>
+  `;
+
+  const iconSize: [number, number] = [30, 30];
+  const iconAnchor: [number, number] = [15, 15];
+
   switch (type) {
-    case 'harbor': return '⚓';
-    case 'market': return '🐟';
-    case 'station': return '🛡️';
-    case 'zone': return '🎣';
-    case 'dock': return '🚢';
-    default: return '📍';
+    case 'harbor': 
+      return new L.DivIcon({
+        html: iconHtml('⚓'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
+    case 'market': 
+      return new L.DivIcon({
+        html: iconHtml('🐟'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
+    case 'station': 
+      return new L.DivIcon({
+        html: iconHtml('🛡️'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
+    case 'zone': 
+      return new L.DivIcon({
+        html: iconHtml('🎣'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
+    case 'dock': 
+      return new L.DivIcon({
+        html: iconHtml('🚢'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
+    default: 
+      return new L.DivIcon({
+        html: iconHtml('📍'),
+        className: 'custom-marker',
+        iconSize,
+        iconAnchor
+      });
   }
+};
+
+// User location marker icon
+const getUserLocationIcon = () => {
+  return new L.DivIcon({
+    html: `
+      <div style="
+        background: #ef4444;
+        border: 3px solid white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      "></div>
+    `,
+    className: 'user-location-marker',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
 };
 
 export function MapCard() {
@@ -103,6 +219,12 @@ export function MapCard() {
     const [selectedPOI, setSelectedPOI] = useState<FishingPOI | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [mapReady, setMapReady] = useState(false);
+
+    useEffect(() => {
+        // Set map ready after component mounts (for SSR compatibility)
+        setMapReady(true);
+    }, []);
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -140,27 +262,7 @@ export function MapCard() {
         );
     }, []);
 
-    if (!apiKey) {
-        return (
-            <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <MapIcon className="w-6 h-6 text-primary" />
-                        {t('map_title')} (Demo)
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-[400px] w-full rounded-lg border bg-muted flex flex-col items-center justify-center text-center p-4">
-                        <MapIcon className="w-12 h-12 mb-4 text-muted-foreground" />
-                        <p className="font-bold">Map is in Demo Mode</p>
-                        <p className="text-sm text-muted-foreground">To enable the interactive map, please provide a valid Google Maps API key.</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    if (loading) {
+    if (loading || !mapReady) {
         return (
             <Card className="shadow-lg">
                 <CardHeader>
@@ -208,56 +310,61 @@ export function MapCard() {
                     </div>
                     
                     <div className="h-[400px] w-full rounded-lg border overflow-hidden">
-                        <APIProvider apiKey={apiKey}>
-                            <Map
-                                defaultCenter={userLocation || { lat: 17.6868, lng: 83.2185 }}
-                                defaultZoom={13}
-                                gestureHandling={'greedy'}
-                                disableDefaultUI={false}
-                                mapId="fisherMateMap"
-                                mapTypeId="hybrid"
-                            >
-                                {/* User Location Marker */}
-                                {userLocation && (
-                                    <Marker
-                                        position={userLocation}
-                                        title="Your Location"
-                                    />
-                                )}
-                                
-                                {/* Fishing POI Markers */}
-                                {fishingPOIs.map((poi) => (
-                                    <Marker
-                                        key={poi.id}
-                                        position={poi.position}
-                                        title={poi.name}
-                                        onClick={() => setSelectedPOI(poi)}
-                                    />
-                                ))}
-                                
-                                {/* Info Window for selected POI */}
-                                {selectedPOI && (
-                                    <InfoWindow
-                                        position={selectedPOI.position}
-                                        onCloseClick={() => setSelectedPOI(null)}
-                                    >
+                        <MapContainer
+                            center={[userLocation?.lat || 17.6868, userLocation?.lng || 83.2185]}
+                            zoom={13}
+                            style={{ height: '100%', width: '100%' }}
+                            scrollWheelZoom={true}
+                        >
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            
+                            {/* User Location Marker */}
+                            {userLocation && (
+                                <Marker
+                                    position={[userLocation.lat, userLocation.lng]}
+                                    icon={getUserLocationIcon()}
+                                >
+                                    <Popup>
+                                        <div className="text-center">
+                                            <strong>📍 Your Location</strong>
+                                            <br />
+                                            <small>Lat: {userLocation.lat.toFixed(4)}, Lng: {userLocation.lng.toFixed(4)}</small>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            )}
+                            
+                            {/* Fishing POI Markers */}
+                            {fishingPOIs.map((poi) => (
+                                <Marker
+                                    key={poi.id}
+                                    position={[poi.position.lat, poi.position.lng]}
+                                    icon={getMarkerIcon(poi.type)}
+                                    eventHandlers={{
+                                        click: () => setSelectedPOI(poi),
+                                    }}
+                                >
+                                    <Popup>
                                         <div className="p-2 max-w-xs">
                                             <h3 className="font-semibold text-sm flex items-center gap-1">
-                                                <span>{getMarkerIcon(selectedPOI.type)}</span>
-                                                {selectedPOI.name}
+                                                <span>{poi.type === 'harbor' ? '⚓' : poi.type === 'market' ? '🐟' : poi.type === 'station' ? '🛡️' : poi.type === 'zone' ? '🎣' : '🚢'}</span>
+                                                {poi.name}
                                             </h3>
-                                            <p className="text-xs text-gray-600 mt-1">{selectedPOI.description}</p>
-                                            {selectedPOI.distance && (
+                                            <p className="text-xs text-gray-600 mt-1">{poi.description}</p>
+                                            {poi.distance && (
                                                 <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
                                                     <MapPin className="w-3 h-3" />
-                                                    {selectedPOI.distance} km away
+                                                    {poi.distance} km away
                                                 </p>
                                             )}
                                         </div>
-                                    </InfoWindow>
-                                )}
-                            </Map>
-                        </APIProvider>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                        </MapContainer>
                     </div>
                     
                     {/* Quick POI List */}
