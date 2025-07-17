@@ -2,6 +2,7 @@ import { Header } from "@/components/Header";
 import { WeatherCard } from "@/components/WeatherCard";
 import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
+import { Chatbot } from "@/components/Chatbot";
 
 export default function Home() {
   return (
@@ -17,13 +18,13 @@ export default function Home() {
           </p>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          <div className="lg:col-span-3 space-y-8">
             <FishingLawsChat />
-          </div>
-          <div className="space-y-8">
-            <WeatherCard />
             <SafetyTips />
+          </div>
+          <div className="lg:col-span-2">
+             <Chatbot />
           </div>
         </div>
       </main>

@@ -16,6 +16,7 @@ const prompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are a helpful assistant.
 
 {{#each history}}

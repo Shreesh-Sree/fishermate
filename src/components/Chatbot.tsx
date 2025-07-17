@@ -9,7 +9,7 @@ import { MessageSquare, Send, X, Loader2, User, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { handleChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,6 @@ const chatSchema = z.object({
 });
 
 export function Chatbot() {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -71,29 +70,23 @@ export function Chatbot() {
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button
-          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg"
-          size="icon"
-          aria-label="Open chatbot"
-        >
-          <MessageSquare className="h-8 w-8" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full max-w-md flex flex-col p-0">
-        <SheetHeader className="p-4 border-b">
-          <SheetTitle className="flex items-center gap-2">
-            <Bot />
-            AI Assistant
-          </SheetTitle>
-          <SheetClose className="absolute right-4 top-4">
-             <X className="h-4 w-4" />
-             <span className="sr-only">Close</span>
-          </SheetClose>
-        </SheetHeader>
+    <Card className="shadow-lg h-[44rem] flex flex-col">
+       <CardHeader>
+        <CardTitle className="font-headline flex items-center gap-2">
+          <Bot className="w-6 h-6 text-primary" />
+          AI Assistant
+        </CardTitle>
+        <CardDescription>Ask me anything!</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col p-0">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
           <div className="p-4 space-y-4">
+             {messages.length === 0 && (
+              <div className="text-center text-muted-foreground p-8">
+                <MessageSquare className="mx-auto h-12 w-12 mb-4" />
+                <p>Start a conversation by typing a message below.</p>
+              </div>
+            )}
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -167,7 +160,7 @@ export function Chatbot() {
             </form>
           </Form>
         </div>
-      </SheetContent>
-    </Sheet>
+        </CardContent>
+    </Card>
   );
 }
