@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 export const metadata: Metadata = {
-  title: 'SeaGuide AI',
+  title: 'FisherMate.AI',
   description: 'AI-powered guide for fisherfolk communities in India.',
 };
 

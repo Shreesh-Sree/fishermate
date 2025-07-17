@@ -1,4 +1,4 @@
-# **App Name**: SeaGuide AI
+# **App Name**: FisherMate.AI
 
 ## Core Features:
 

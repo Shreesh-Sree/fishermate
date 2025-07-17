@@ -1,6 +1,6 @@
 
 const en = {
-  app_title: "SeaGuide AI",
+  app_title: "FisherMate.AI",
   home_title: "Your AI Guide on the High Seas",
   home_subtitle: "Instant, multilingual information on fishing laws, safety practices, and real-time weather alerts, designed for fisherfolk communities.",
   weather_title: "Real-time Weather",
@@ -26,7 +26,7 @@ const en = {
 };
 
 const ta = {
-  app_title: "கடல் வழிகாட்டி AI",
+  app_title: "FisherMate.AI",
   home_title: "கடலில் உங்கள் AI வழிகாட்டி",
   home_subtitle: "மீனவ சமூகங்களுக்காக வடிவமைக்கப்பட்ட, மீன்பிடி சட்டங்கள், பாதுகாப்பு நடைமுறைகள் மற்றும் நிகழ்நேர வானிலை எச்சரிக்கைகள் பற்றிய உடனடி, பன்மொழித் தகவல்.",
   weather_title: "நிகழ்நேர வானிலை",

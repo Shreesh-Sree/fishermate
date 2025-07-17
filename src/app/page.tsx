@@ -35,7 +35,7 @@ export default function Home() {
         </div>
       </main>
       <footer className="text-center p-4 mt-8 text-muted-foreground text-sm border-t">
-        <p>&copy; {new Date().getFullYear()} SeaGuide AI. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} FisherMate.AI. All rights reserved.</p>
       </footer>
     </div>
   );

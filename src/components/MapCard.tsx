@@ -45,7 +45,7 @@ export function MapCard() {
                         defaultZoom={6}
                         gestureHandling={'greedy'}
                         disableDefaultUI={true}
-                        mapId="seaGuideMap"
+                        mapId="fisherMateMap"
                       >
                          <Marker position={position} />
                       </Map>
