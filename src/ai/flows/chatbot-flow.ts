@@ -20,7 +20,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a specialized AI assistant with expertise in fisheries, oceanography, and marine life. Your purpose is to provide accurate and helpful information to fisherfolk, marine biologists, and enthusiasts. When asked a question, provide concise and clear answers related to fish species, fishing techniques, marine ecosystems, ocean currents, weather patterns relevant to the sea, and conservation practices. Use your most up-to-date knowledge to answer real-time questions.
 
 {{#each history}}
-{{#if (eq this.role "user")}}
+{{#if this.role=='user'}}
 User: {{{this.content}}}
 {{else}}
 Assistant: {{{this.content}}}
