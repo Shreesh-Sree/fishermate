@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Map } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -11,6 +12,8 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
+// This delete and mergeOptions is a common fix for icon path issues in React-Leaflet with bundlers like Webpack.
+// It ensures that Leaflet can find the icon image files correctly.
 delete (L.Icon.Default.prototype as any)._getIconUrl;  
 L.Icon.Default.mergeOptions({
     iconUrl: markerIcon.src,
@@ -20,7 +23,20 @@ L.Icon.Default.mergeOptions({
 
 
 export function MapCard() {
+    const [isMounted, setIsMounted] = useState(false);
     const position: [number, number] = [16.506, 80.648];
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <div className="h-[448px] w-full rounded-lg border flex items-center justify-center">
+                <p>Loading map...</p>
+            </div>
+        );
+    }
 
     return (
         <Card className="shadow-lg">
@@ -48,3 +64,6 @@ export function MapCard() {
         </Card>
     );
 }
+
+// Export as default for easier dynamic import
+export default MapCard;

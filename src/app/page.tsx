@@ -7,7 +7,7 @@ import { FishingLawsChat } from "@/components/FishingLawsChat";
 import { Chatbot } from "@/components/Chatbot";
 import dynamic from 'next/dynamic';
 
-const MapCard = dynamic(() => import('@/components/MapCard').then(mod => mod.MapCard), {
+const MapCard = dynamic(() => import('@/components/MapCard'), {
   ssr: false,
   loading: () => <div className="h-[448px] w-full rounded-lg border flex items-center justify-center"><p>Loading map...</p></div>
 });
