@@ -5,21 +5,33 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BookText, Search, Loader2, Volume2, Pause } from "lucide-react";
+import { BookText, Search, Loader2, Volume2, Pause, Lightbulb } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { indianStates } from "@/lib/data";
 import { handleFishingLaws } from "@/app/actions";
 import type { SummarizeFishingLawsOutput } from "@/ai/flows/summarize-fishing-laws";
 import { useLanguage } from "@/context/LanguageContext";
 
+const prebuiltQuestions = [
+  "What are the seasonal fishing bans and restrictions?",
+  "What are the regulations for using fishing nets?",
+  "What licenses are required for commercial fishing?",
+  "What are the minimum catch size requirements?",
+  "What are the restricted fishing zones and marine protected areas?",
+  "What penalties exist for illegal fishing practices?",
+  "What are the deep-sea fishing regulations?",
+  "What equipment restrictions apply to fishing boats?",
+];
+
 const fishingLawsSchema = z.object({
-  query: z.string().min(10, { message: "Please enter a specific question." }),
+  query: z.string().min(5, { message: "Please enter a question (minimum 5 characters)." }),
   state: z.string({ required_error: "Please select a state." }),
 });
 
@@ -28,13 +40,15 @@ export function FishingLawsChat() {
   const [result, setResult] = useState<SummarizeFishingLawsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof fishingLawsSchema>>({
     resolver: zodResolver(fishingLawsSchema),
     defaultValues: {
-      query: "What are the regulations for using fishing nets?",
+      query: "",
+      state: "",
     },
   });
   
@@ -55,37 +69,76 @@ export function FishingLawsChat() {
   }, []);
 
 
+  const handleQuestionSelect = (question: string) => {
+    setSelectedQuestion(question);
+    form.setValue("query", question);
+  };
+
   const togglePlay = () => {
     if (!audioRef.current) return;
   
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch((error) => {
+        console.error("Error playing audio:", error);
+        toast({
+          variant: "destructive",
+          title: "Audio Error",
+          description: "Failed to play audio. Please try again.",
+        });
+      });
     }
     setIsPlaying(!isPlaying);
   };
 
   async function onSubmit(values: z.infer<typeof fishingLawsSchema>) {
+    if (!values.state || !values.query.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please select a state and enter a question.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
     stopAndResetAudio();
 
     try {
-      const response = await handleFishingLaws(values);
-      setResult(response);
-      if (response.audio) {
-        const audio = new Audio(response.audio);
-        audio.setAttribute('playsinline', 'true');
-        audio.addEventListener('ended', () => setIsPlaying(false));
-        audioRef.current = audio;
+      const response = await handleFishingLaws({
+        state: values.state,
+        query: values.query.trim(),
+      });
+      
+      if (response?.summary) {
+        setResult(response);
+        if (response.audio) {
+          const audio = new Audio(response.audio);
+          audio.setAttribute('playsinline', 'true');
+          audio.addEventListener('ended', () => setIsPlaying(false));
+          audio.addEventListener('error', () => {
+            console.error("Audio failed to load");
+            toast({
+              variant: "destructive",
+              title: "Audio Error",
+              description: "Audio playback is not available for this response.",
+            });
+          });
+          audioRef.current = audio;
+        }
+      } else {
+        throw new Error("No summary received from the server");
       }
     } catch (error) {
       console.error("Error fetching fishing laws:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch fishing laws summary. Please try again.",
+        description: error instanceof Error 
+          ? `Failed to fetch fishing laws: ${error.message}` 
+          : "Failed to fetch fishing laws summary. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -111,7 +164,7 @@ export function FishingLawsChat() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('state_label')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t('select_state_placeholder')} />
@@ -136,14 +189,43 @@ export function FishingLawsChat() {
                   <FormItem>
                     <FormLabel>{t('question_label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t('fishing_laws_query_placeholder')} {...field} />
+                      <Input 
+                        placeholder={t('fishing_laws_query_placeholder')} 
+                        {...field}
+                        value={selectedQuestion || field.value}
+                        onChange={(e) => {
+                          setSelectedQuestion("");
+                          field.onChange(e);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <Button type="submit" disabled={isLoading} className="w-full">
+
+            {/* Prebuilt Questions Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-accent" />
+                <span className="text-sm font-medium text-muted-foreground">Quick Questions:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {prebuiltQuestions.map((question, index) => (
+                  <Badge
+                    key={index}
+                    variant={selectedQuestion === question ? "default" : "secondary"}
+                    className="cursor-pointer hover:bg-primary/80 transition-colors text-xs px-2 py-1"
+                    onClick={() => handleQuestionSelect(question)}
+                  >
+                    {question}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <Button type="submit" disabled={isLoading || !form.watch("state") || !form.watch("query")?.trim()} className="w-full">
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

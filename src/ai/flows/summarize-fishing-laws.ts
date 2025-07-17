@@ -8,19 +8,9 @@
  * - SummarizeFishingLawsOutput - The return type for the summarizeFishingLaws function.
  */
 
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import wav from 'wav';
-
-// Dedicated AI instance for this flow, using a specific API key.
-const fishingLawsAI = genkit({
-  plugins: [
-    googleAI({
-      apiKey: process.env.FISHING_LAWS_API_KEY,
-    }),
-  ],
-});
 
 
 const SummarizeFishingLawsInputSchema = z.object({
@@ -39,16 +29,23 @@ export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Pr
   return summarizeFishingLawsFlow(input);
 }
 
-const summarizeFishingLawsPrompt = fishingLawsAI.definePrompt({
+const summarizeFishingLawsPrompt = ai.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
   output: {schema: z.string().nullable()},
   model: 'googleai/gemini-1.5-flash-latest',
-  prompt: `You are an expert on Indian fishing laws. Provide a concise summary of the fishing laws for the state of {{state}} based on the following query:
+  prompt: `You are an expert on Indian fishing laws and marine regulations. Provide a comprehensive and accurate summary of the fishing laws for the state of {{state}} based on the following query:
 
 Query: "{{query}}"
 
-Your response should directly address the user's query and be a clear, easy-to-understand summary.`,
+Your response should:
+- Be specific to {{state}} state regulations
+- Include relevant legal details, restrictions, and requirements
+- Mention applicable penalties or consequences
+- Be clear and easy to understand for fisherfolk
+- Include practical guidance where appropriate
+
+If specific information for {{state}} is not available, provide general Indian fishing law guidelines and clearly state when information is general rather than state-specific.`,
 });
 
 async function toWav(
@@ -78,7 +75,7 @@ async function toWav(
   });
 }
 
-const summarizeFishingLawsFlow = fishingLawsAI.defineFlow(
+const summarizeFishingLawsFlow = ai.defineFlow(
   {
     name: 'summarizeFishingLawsFlow',
     inputSchema: SummarizeFishingLawsInputSchema,
@@ -86,10 +83,10 @@ const summarizeFishingLawsFlow = fishingLawsAI.defineFlow(
   },
   async input => {
     const {output: summary} = await summarizeFishingLawsPrompt(input);
-    const validSummary = summary ?? "I'm sorry, I was unable to generate a summary for your query. Please try again with a different question.";
+    const validSummary = summary ?? "I'm sorry, I was unable to generate a summary for your query. Please try again with a different question or check if the state name is correct.";
 
-
-    const {media} = await fishingLawsAI.generate({
+    // Generate audio using the same AI instance
+    const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       config: {
         responseModalities: ['AUDIO'],
