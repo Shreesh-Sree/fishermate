@@ -140,16 +140,16 @@ export function PopupChatbot() {
   // Floating chat button
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-16 h-16 rounded-full shadow-lg bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transform hover:scale-110 transition-all duration-300"
           size="icon"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle className="w-8 h-8 animate-float" />
         </Button>
-        <div className="absolute -top-2 -right-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+        <div className="absolute -top-1 -right-1">
+          <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white"></div>
         </div>
       </div>
     );
@@ -157,15 +157,15 @@ export function PopupChatbot() {
 
   // Chat window
   return (
-    <div className={`fixed bottom-6 right-6 z-50 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'} transition-all duration-300`}>
-      <Card className="w-full h-full shadow-xl border-2">
+    <div className={`fixed bottom-6 right-6 z-50 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'} transition-all duration-300 animate-slide-in-right`}>
+      <Card className="w-full h-full shadow-2xl border-2 border-gray-200 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-lg">
         {/* Header */}
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Bot className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-lg font-bold">
+              <Bot className="w-5 h-5" />
               FisherMate AI
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-green-400 text-green-900 border-none">
                 Online
               </Badge>
             </CardTitle>
@@ -174,7 +174,7 @@ export function PopupChatbot() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="w-8 h-8"
+                className="w-8 h-8 text-white hover:bg-white/20"
               >
                 {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
               </Button>
@@ -182,7 +182,7 @@ export function PopupChatbot() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8"
+                className="w-8 h-8 text-white hover:bg-white/20"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -191,17 +191,17 @@ export function PopupChatbot() {
         </CardHeader>
 
         {!isMinimized && (
-          <CardContent className="flex flex-col h-[calc(100%-5rem)] p-4">
+          <CardContent className="flex flex-col h-[calc(100%-5rem)] p-4 bg-white">
             {/* Messages */}
             <ScrollArea className="flex-1 mb-4 pr-3">
               <div className="space-y-4">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
                   >
                     <div className={`flex gap-2 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.sender === 'user' ? 'bg-blue-600' : 'bg-gray-200'
                       }`}>
                         {message.sender === 'user' ? (
@@ -210,13 +210,13 @@ export function PopupChatbot() {
                           <Bot className="w-4 h-4 text-gray-600" />
                         )}
                       </div>
-                      <div className={`rounded-lg px-3 py-2 ${
+                      <div className={`rounded-xl px-3 py-2 shadow-md ${
                         message.sender === 'user'
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white'
                           : 'bg-gray-100 text-gray-900'
                       }`}>
                         <p className="text-sm leading-relaxed">{message.content}</p>
-                        <p className={`text-xs mt-1 ${
+                        <p className={`text-xs mt-1 text-right ${
                           message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                         }`}>
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -227,12 +227,12 @@ export function PopupChatbot() {
                 ))}
                 
                 {isTyping && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start animate-fade-in">
                     <div className="flex gap-2 max-w-[80%]">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <Bot className="w-4 h-4 text-gray-600" />
                       </div>
-                      <div className="bg-gray-100 rounded-lg px-3 py-2">
+                      <div className="bg-gray-100 rounded-xl px-3 py-2 shadow-md">
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -247,16 +247,21 @@ export function PopupChatbot() {
             </ScrollArea>
 
             {/* Input */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 border-t pt-4">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me about fishing..."
-                className="flex-1"
+                className="flex-1 rounded-full px-4 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
-              <Button onClick={handleSend} disabled={!input.trim() || isTyping}>
-                <Send className="w-4 h-4" />
+              <Button 
+                onClick={handleSend} 
+                disabled={!input.trim() || isTyping}
+                className="rounded-full w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                size="icon"
+              >
+                <Send className="w-5 h-5" />
               </Button>
             </div>
           </CardContent>

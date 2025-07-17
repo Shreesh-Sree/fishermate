@@ -94,41 +94,56 @@ const GoogleMapCard = () => {
   const initializeMap = () => {
     if (!mapRef.current || !userLocation || !window.google) return;
 
+    // Modern map styles
+    const mapStyles = [
+      { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+      { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+      { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+      { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#bdbdbd" }] },
+      { featureType: "poi", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+      { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
+      { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+      { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#dadada" }] },
+      { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+      { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+      { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
+      { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9c9c9" }] },
+      { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }
+    ];
+
     // Initialize Google Map
     const map = new google.maps.Map(mapRef.current, {
       center: userLocation,
       zoom: 13,
-      mapTypeId: google.maps.MapTypeId.TERRAIN,
-      styles: [
-        {
-          featureType: 'water',
-          elementType: 'all',
-          stylers: [{ color: '#3498db' }]
-        },
-        {
-          featureType: 'landscape',
-          elementType: 'all',
-          stylers: [{ color: '#ecf0f1' }]
-        }
-      ]
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      styles: mapStyles,
+      disableDefaultUI: true,
+      zoomControl: true,
     });
 
     googleMapRef.current = map;
 
-    // Add user location marker
-    new google.maps.Marker({
+    // Add user location marker with animation
+    const userMarker = new google.maps.Marker({
       position: userLocation,
       map: map,
       title: 'Your Location',
       icon: {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="8" fill="#3b82f6" stroke="#ffffff" stroke-width="2"/>
-            <circle cx="12" cy="12" r="3" fill="#ffffff"/>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="16" fill="#1D4ED8" stroke="#FFFFFF" stroke-width="3"/>
+            <circle cx="24" cy="24" r="8" fill="#FFFFFF"/>
           </svg>
         `),
-        scaledSize: new google.maps.Size(24, 24),
-      }
+        scaledSize: new google.maps.Size(48, 48),
+      },
+      animation: google.maps.Animation.DROP,
     });
 
     // Search for nearby fishing-related places using Places API
@@ -214,29 +229,29 @@ const GoogleMapCard = () => {
 
   const getMarkerIcon = (type: string) => {
     const colors = {
-      fishing_spot: '#3b82f6',
-      marina: '#8b5cf6', 
-      bait_shop: '#10b981',
-      safety_station: '#ef4444',
-      restaurant: '#f59e0b'
+      fishing_spot: '#3b82f6', // Blue
+      marina: '#8b5cf6', // Purple
+      bait_shop: '#10b981', // Green
+      safety_station: '#ef4444', // Red
+      restaurant: '#f59e0b' // Amber
     };
 
     const icons = {
-      fishing_spot: '🎣',
-      marina: '⚓',
-      bait_shop: '🏪',
-      safety_station: '🛡️',
-      restaurant: '🍽️'
+      fishing_spot: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', // Simplified fish icon
+      marina: 'M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.5L19 8l-7 3.5L5 8l7-3.5zM4 16.5V9l7 3.5v7.5L4 16.5z', // Simplified anchor
+      bait_shop: 'M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zm5 14H8v-2h3v2zm0-4H8v-2h3v2zm0-4H8V8h3v2zm5 4h-3v-2h3v2zm0-4h-3v-2h3v2zm0-4h-3V8h3v2z', // Simplified shop
+      safety_station: 'M12 2l-9 4.5V12c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6.5L12 2z', // Shield
+      restaurant: 'M12 2l.94 3.06L16 6l-2.94 1.94L12 11l-1.06-3.06L8 6l3.06-.94L12 2z' // Star
     };
 
     return {
       url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="16" cy="16" r="12" fill="${colors[type as keyof typeof colors] || '#6b7280'}" stroke="#ffffff" stroke-width="2"/>
-          <text x="16" y="20" text-anchor="middle" font-size="12" fill="white">${icons[type as keyof typeof icons] || '📍'}</text>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="${colors[type as keyof typeof colors] || '#6b7280'}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill-opacity="0.8"/>
+          <path d="${icons[type as keyof typeof icons] || ''}" fill="white"/>
         </svg>
       `)}`,
-      scaledSize: new google.maps.Size(32, 32),
+      scaledSize: new google.maps.Size(40, 40),
     };
   };
 
@@ -309,128 +324,86 @@ const GoogleMapCard = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            Fishing Map & Nearby Spots
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-64 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
-            <div className="text-gray-500">Loading Google Maps and location data...</div>
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full bg-gray-50 rounded-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-800">Locating Your Position...</p>
+            <p className="text-sm text-gray-500">Fetching nearby fishing data.</p>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="modern-card-tall animate-fade-in hover-lift">
-      <CardContent className="p-0 h-full">
-        {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-4 rounded-t-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold animate-shimmer">Interactive Map</h3>
-              <p className="text-indigo-100 text-xs">Fishing spots near you</p>
-            </div>
-            <MapPin className="w-8 h-8 text-white animate-float" />
-          </div>
-          {error && (
-            <div className="flex items-center gap-2 text-amber-200 text-sm mt-2 animate-slide-in-left">
-              <AlertTriangle className="w-4 h-4" />
-              <span className="text-xs">{error}</span>
-            </div>
-          )}
         </div>
+      );
+    }
 
-        <div className="p-4 space-y-4 flex-1">
-          {/* Google Maps Container */}
-          <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg hover-glow">
-            <div ref={mapRef} className="w-full h-48 lg:h-56" />
-            
-            {/* Map overlay with location info */}
-            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium">
-                  {userLocation ? 'Location tracked' : 'Finding location...'}
-                </span>
-              </div>
-            </div>
-
-            {/* POI count overlay */}
-            <div className="absolute top-3 right-3 bg-indigo-600 text-white rounded-lg p-2 shadow-md animate-glow">
-              <div className="text-xs font-bold">{fishingPOIs.length} spots</div>
-            </div>
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-full bg-red-50 rounded-2xl">
+          <div className="text-center p-6">
+            <AlertTriangle className="w-12 h-12 mb-4 mx-auto text-red-600" />
+            <p className="font-bold text-red-800">Map Error</p>
+            <p className="text-sm text-red-700">{error}</p>
           </div>
+        </div>
+      );
+    }
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-lg border border-blue-100 hover-glow transition-all">
-              <div className="text-sm font-bold text-blue-600">
-                {fishingPOIs.filter(p => p.type === 'fishing_spot').length}
-              </div>
-              <div className="text-xs text-blue-700">Spots</div>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-2 rounded-lg border border-purple-100 hover-glow transition-all">
-              <div className="text-sm font-bold text-purple-600">
-                {fishingPOIs.filter(p => p.type === 'marina').length}
-              </div>
-              <div className="text-xs text-purple-700">Marinas</div>
-            </div>
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-2 rounded-lg border border-green-100 hover-glow transition-all">
-              <div className="text-sm font-bold text-green-600">
-                {fishingPOIs.filter(p => p.type === 'bait_shop').length}
-              </div>
-              <div className="text-xs text-green-700">Shops</div>
-            </div>
-          </div>
-
-          {/* Nearby Spots List */}
-          {fishingPOIs.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Fish className="w-4 h-4 text-indigo-600" />
-                <span className="text-sm font-medium text-indigo-800">Nearby ({fishingPOIs.length})</span>
-              </div>
-              
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {fishingPOIs.slice(0, 3).map((poi, index) => (
-                  <div 
-                    key={poi.id} 
-                    className={`p-2 rounded-lg border-l-4 hover-glow transition-all duration-300 ${getColorForPOI(poi.type)}`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {getIconForPOI(poi.type)}
-                          <h4 className="font-medium text-xs truncate">{poi.name}</h4>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500">📍 {poi.distance.toFixed(1)} km</span>
-                          {poi.rating && (
-                            <span className="text-yellow-600">⭐ {poi.rating}</span>
-                          )}
-                        </div>
+    return (
+      <div className="flex flex-col h-full">
+        {/* Map container */}
+        <div ref={mapRef} className="flex-grow rounded-t-2xl" />
+        
+        {/* POI list */}
+        <div className="p-4 bg-white rounded-b-2xl h-72 overflow-y-auto">
+          <h4 className="text-lg font-bold text-gray-900 mb-3">Nearby Points of Interest</h4>
+          {fishingPOIs.length > 0 ? (
+            <ul className="space-y-3">
+              {fishingPOIs.slice(0, 10).map((poi) => (
+                <li 
+                  key={poi.id} 
+                  className={`p-3 rounded-xl border-l-4 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 ${getColorForPOI(poi.type)}`}
+                  onClick={() => getDirections(poi)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md">
+                        {getIconForPOI(poi.type)}
                       </div>
-                      <button
-                        onClick={() => getDirections(poi)}
-                        className="ml-2 flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white text-xs rounded-md hover:bg-indigo-700 transition-colors animate-glow"
-                      >
-                        <Navigation className="w-3 h-3" />
-                      </button>
+                      <div>
+                        <p className="font-semibold text-md text-gray-900">{poi.name}</p>
+                        <p className="text-xs text-gray-600 truncate max-w-xs">{poi.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <p className="text-md font-bold text-gray-800">{poi.distance.toFixed(1)} km</p>
+                      {poi.rating && (
+                        <div className="flex items-center justify-end text-xs text-amber-600 mt-1">
+                          <Star className="w-3 h-3 mr-1 fill-current" />
+                          <span className="font-semibold">{poi.rating.toFixed(1)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-8">
+              <Fish className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-600 font-semibold">No Fishing Spots Found Nearby</p>
+              <p className="text-sm text-gray-400">Try zooming out or exploring a different area.</p>
             </div>
           )}
         </div>
+      </div>
+    );
+  };
+
+  return (
+    <Card className="modern-card-tall animate-fade-in hover-lift overflow-hidden">
+      <CardContent className="p-0 h-full">
+        {renderContent()}
       </CardContent>
     </Card>
   );

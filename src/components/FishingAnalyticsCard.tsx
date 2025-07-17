@@ -321,214 +321,104 @@ const FishingAnalyticsCard = () => {
     return <TrendingDown className="w-5 h-5" />;
   };
 
-  if (loading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Fish className="w-5 h-5" />
-            Fishing Analytics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="h-20 bg-gray-200 rounded-lg"></div>
-            <div className="h-16 bg-gray-200 rounded-lg"></div>
-            <div className="h-32 bg-gray-200 rounded-lg"></div>
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-700">Analyzing fishing conditions...</p>
+            <p className="text-sm text-gray-500">Please wait while we crunch the numbers.</p>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
+        </div>
+      );
+    }
 
-  if (error || !analytics) {
+    if (error || !analytics) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+            <Activity className="w-12 h-12 mb-4 mx-auto text-red-500" />
+            <p className="font-bold text-red-700">Analytics Error</p>
+            <p className="text-sm text-red-600">{error || 'Could not load analytics.'}</p>
+          </div>
+        </div>
+      );
+    }
+
+    const { fishingScore, recommendations, solarData, tideData, moonPhase } = analytics;
+    const scoreColor = fishingScore.overall >= 80 ? 'text-green-500' : fishingScore.overall >= 60 ? 'text-yellow-500' : 'text-red-500';
+
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Fish className="w-5 h-5" />
-            Fishing Analytics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertDescription>
-              {error || 'Unable to load fishing analytics'}
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <div className="p-4 space-y-4">
+        {/* Overall Score */}
+        <div className="text-center">
+          <div className={`relative w-32 h-32 mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 shadow-inner`}>
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div 
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: `conic-gradient(${scoreColor.replace('text-', '').replace('-500', '')} ${fishingScore.overall * 3.6}deg, #e5e7eb 0deg)`
+              }}
+            ></div>
+            <div className="relative z-10 bg-white w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-md">
+              <p className={`text-4xl font-bold ${scoreColor}`}>{fishingScore.overall}</p>
+              <p className="text-xs text-gray-500">Fishing Score</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recommendations */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
+          <h4 className="text-sm font-bold text-green-800 mb-2">Top Recommendations</h4>
+          <ul className="space-y-1 text-xs text-green-700">
+            {recommendations.slice(0, 2).map((rec, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <Fish className="w-3 h-3 flex-shrink-0" />
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-3 gap-3 text-center">
+          {/* Solar */}
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-2 rounded-lg border border-yellow-100">
+            <Sun className="w-5 h-5 mx-auto text-yellow-600 mb-1" />
+            <p className="text-xs font-medium text-yellow-800">Sunrise</p>
+            <p className="text-sm font-bold text-yellow-900">{solarData.sunrise}</p>
+          </div>
+          {/* Tides */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-2 rounded-lg border border-blue-100">
+            <Waves className="w-5 h-5 mx-auto text-blue-600 mb-1" />
+            <p className="text-xs font-medium text-blue-800">High Tide</p>
+            <p className="text-sm font-bold text-blue-900">{tideData.highTide}</p>
+          </div>
+          {/* Moon */}
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-2 rounded-lg border border-indigo-100">
+            <Moon className="w-5 h-5 mx-auto text-indigo-600 mb-1" />
+            <p className="text-xs font-medium text-indigo-800">Moon</p>
+            <p className="text-sm font-bold text-indigo-900">{moonPhase.phase}</p>
+          </div>
+        </div>
+      </div>
     );
-  }
+  };
 
   return (
     <Card className="modern-card animate-fade-in hover-lift">
+      <CardHeader className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white p-4 rounded-t-xl">
+        <div className="flex items-center gap-3">
+          <Activity className="w-6 h-6 text-white animate-float" />
+          <div>
+            <h3 className="text-lg font-bold animate-shimmer">Fishing Analytics</h3>
+            <p className="text-green-100 text-sm">Your AI-powered fishing forecast</p>
+          </div>
+        </div>
+      </CardHeader>
       <CardContent className="p-0 h-full">
-        {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white p-4 rounded-t-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold animate-shimmer">Fishing Analytics</h3>
-              <p className="text-emerald-100 text-xs">Real-time conditions</p>
-            </div>
-            <Fish className="w-8 h-8 text-white animate-float" />
-          </div>
-        </div>
-
-        {/* Fishing Score Display */}
-        <div className="p-4 text-center border-b border-gray-100">
-          <div className="relative inline-block">
-            <div className="text-4xl font-bold text-emerald-600 animate-pulse-slow">
-              {analytics.fishingScore.overall}/100
-            </div>
-            <div className="text-sm text-gray-600 mt-1">Fishing Score</div>
-            
-            {/* Circular progress indicator */}
-            <div className="absolute -inset-3 rounded-full border-4 border-emerald-200">
-              <div 
-                className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"
-                style={{ animationDuration: '3s' }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Score breakdown badges */}
-          <div className="flex justify-center gap-2 mt-4 flex-wrap">
-            <Badge variant="outline" className="text-xs animate-glow">
-              Weather: {analytics.fishingScore.factors.weather}%
-            </Badge>
-            <Badge variant="outline" className="text-xs animate-glow">
-              Tides: {analytics.fishingScore.factors.tides}%
-            </Badge>
-            <Badge variant="outline" className="text-xs animate-glow">
-              Moon: {analytics.fishingScore.factors.moonPhase}%
-            </Badge>
-          </div>
-        </div>
-
-        {/* Analytics Grid */}
-        <div className="p-4 space-y-4">
-          {/* Solar & Tide Info */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Solar Panel */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-3 rounded-lg border border-yellow-100 hover-glow transition-all">
-              <div className="flex items-center gap-2 mb-2">
-                <Sun className="w-4 h-4 text-yellow-600" />
-                <span className="text-xs font-medium text-yellow-800">Solar</span>
-              </div>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-yellow-600">Sunrise:</span>
-                  <span className="font-semibold text-yellow-900">{analytics.solarData.sunrise}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-yellow-600">Sunset:</span>
-                  <span className="font-semibold text-yellow-900">{analytics.solarData.sunset}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-yellow-600">UV Index:</span>
-                  <Badge variant={analytics.solarData.uvIndex > 6 ? 'destructive' : 'default'} className="text-xs">
-                    {analytics.solarData.uvIndex}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Tide Panel */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-3 rounded-lg border border-blue-100 hover-glow transition-all">
-              <div className="flex items-center gap-2 mb-2">
-                <Waves className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-medium text-blue-800">Tides</span>
-              </div>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-blue-600">High:</span>
-                  <span className="font-semibold text-blue-900">{analytics.tideData.highTide}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-600">Low:</span>
-                  <span className="font-semibold text-blue-900">{analytics.tideData.lowTide}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-blue-600">Status:</span>
-                  <div className="flex items-center gap-1">
-                    {analytics.tideData.currentTide === 'rising' ? 
-                      <TrendingUp className="w-3 h-3 text-green-500" /> : 
-                      <TrendingDown className="w-3 h-3 text-red-500" />
-                    }
-                    <span className="font-semibold text-blue-900 capitalize">
-                      {analytics.tideData.currentTide}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Moon Phase Section */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-3 rounded-lg border border-purple-100 animate-slide-in-left">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Moon className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-800">Moon Phase</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-lg animate-float">{analytics.moonPhase.icon}</span>
-                <span className="text-xs font-semibold text-purple-900">{analytics.moonPhase.phase}</span>
-              </div>
-            </div>
-            
-            {/* Moon illumination progress bar */}
-            <div className="relative">
-              <div className="w-full bg-purple-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-1000 animate-shimmer" 
-                  style={{ width: `${analytics.moonPhase.illumination}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-purple-600 mt-1 text-center">
-                {analytics.moonPhase.illumination}% illuminated
-              </div>
-            </div>
-          </div>
-
-          {/* Recommendations Section */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Compass className="w-4 h-4 text-indigo-600" />
-              <span className="text-sm font-medium text-indigo-800">Today's Tips</span>
-            </div>
-            <div className="space-y-2">
-              {analytics.recommendations.slice(0, 2).map((rec, index) => (
-                <div 
-                  key={index} 
-                  className="p-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg text-xs border-l-4 border-indigo-400 hover-glow transition-all duration-300"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  {rec}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Stats Footer */}
-          <div className="pt-3 border-t border-gray-200">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
-                <div className="text-sm font-bold text-blue-600">{new Date().getDate()}</div>
-                <div className="text-xs text-gray-500">Today</div>
-              </div>
-              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
-                <div className="text-sm font-bold text-green-600">{analytics.solarData.dayLength}</div>
-                <div className="text-xs text-gray-500">Daylight</div>
-              </div>
-              <div className="p-2 bg-gray-50 rounded-lg hover-glow transition-all">
-                <div className="text-sm font-bold text-purple-600">{analytics.tideData.tideHeight.toFixed(1)}m</div>
-                <div className="text-xs text-gray-500">Tide Height</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {renderContent()}
       </CardContent>
     </Card>
   );

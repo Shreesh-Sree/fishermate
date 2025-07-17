@@ -237,7 +237,11 @@ export function WeatherCard() {
     return (
       <Card className="modern-card animate-pulse">
         <CardContent className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-700">Fetching Weather...</p>
+            <p className="text-sm text-gray-500">Please wait while we get the latest data.</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -245,12 +249,12 @@ export function WeatherCard() {
 
   if (error || !weatherData) {
     return (
-      <Card className="modern-card border-red-200">
+      <Card className="modern-card border-red-200 bg-red-50">
         <CardContent className="flex items-center justify-center h-full text-red-600">
-          <div className="text-center">
-            <AlertTriangle className="w-12 h-12 mb-4 mx-auto text-destructive" />
-            <p className="font-bold">Error fetching weather</p>
-            <p className="text-sm">{error || "Could not load weather data."}</p>
+          <div className="text-center p-4">
+            <AlertTriangle className="w-12 h-12 mb-4 mx-auto text-red-500" />
+            <p className="font-bold text-red-700">Error Fetching Weather</p>
+            <p className="text-sm text-red-600">{error || "Could not load weather data."}</p>
           </div>
         </CardContent>
       </Card>
@@ -261,10 +265,10 @@ export function WeatherCard() {
   const fishingRec = getFishingRecommendation(current);
 
   return (
-    <Card className="modern-card animate-fade-in hover-lift">
-      <CardContent className="p-0 h-full">
+    <Card className="modern-card animate-fade-in hover-lift overflow-hidden">
+      <CardContent className="p-0 h-full flex flex-col">
         {/* Header with gradient background */}
-        <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white p-4 rounded-t-xl">
+        <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white p-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold animate-shimmer">{t('weather_title')}</h3>
@@ -281,19 +285,19 @@ export function WeatherCard() {
         </div>
 
         {/* Main temperature display */}
-        <div className="p-4 text-center border-b border-gray-100">
+        <div className="p-4 text-center border-b border-gray-100 bg-white">
           <div className="text-4xl font-bold text-gray-800 mb-1 animate-pulse-slow">
             {current.temp}°C
           </div>
           <div className="text-sm text-gray-600">
             Feels like {current.apparentTemperature}°C
           </div>
-
+          
           {/* Fishing recommendation badge */}
           <div className="mt-3">
-            <Badge
+            <Badge 
               variant={fishingRec.color as any}
-              className="animate-glow px-3 py-1"
+              className="animate-glow px-3 py-1 text-xs"
             >
               <fishingRec.icon className="w-3 h-3 mr-1" />
               {fishingRec.message}
@@ -302,7 +306,7 @@ export function WeatherCard() {
         </div>
 
         {/* Weather stats grid */}
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-3 bg-gray-50 flex-grow">
           <div className="grid grid-cols-2 gap-3">
             {/* Wind */}
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100 hover-glow transition-all">
