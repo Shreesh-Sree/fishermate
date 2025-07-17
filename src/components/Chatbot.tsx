@@ -47,14 +47,19 @@ export function Chatbot() {
   async function onSubmit(values: z.infer<typeof chatSchema>) {
     setIsLoading(true);
     const userMessage: Message = { role: "user", content: values.message };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages: Message[] = [...messages, userMessage];
+    setMessages(newMessages);
     form.reset();
 
     try {
+      // Provide only the user's message history for cleaner context.
+      const history = newMessages.filter(m => m.role === 'user');
+
       const response = await handleChat({
         message: values.message,
-        history: messages,
+        history: history,
       });
+
       const modelMessage: Message = { role: "model", content: response.content };
       setMessages((prev) => [...prev, modelMessage]);
     } catch (error) {
