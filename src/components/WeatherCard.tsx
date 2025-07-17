@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow, Sunrise, Sunset } from "lucide-react";
+import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchWeatherApi } from 'openmeteo';
@@ -21,12 +21,9 @@ type WeatherData = {
     humidity: number;
     visibility: number;
     pressure: number;
-    uvIndex: number;
     cloudCover: number;
     dewPoint: number;
     isDay: boolean;
-    sunrise: string;
-    sunset: string;
   };
 };
 
@@ -124,12 +121,10 @@ export function WeatherCard() {
           "wind_direction_10m",
           "pressure_msl",
           "visibility",
-          "uv_index",
           "cloud_cover",
           "dew_point_2m",
           "is_day"
         ],
-        "daily": ["sunrise", "sunset"],
         "timezone": "auto",
       };
       const url = "https://api.open-meteo.com/v1/forecast";
@@ -140,9 +135,8 @@ export function WeatherCard() {
         
         const utcOffsetSeconds = response.utcOffsetSeconds();
         const current = response.current()!;
-        const daily = response.daily()!;
 
-        const isDay = current.variables(11)!.value() === 1;
+        const isDay = current.variables(10)!.value() === 1;
         const weatherCode = current.variables(3)!.value();
         const weatherInfo = weatherCodeMap[Math.round(weatherCode)] || weatherCodeMap[0];
         
@@ -163,12 +157,9 @@ export function WeatherCard() {
             humidity: Math.round(current.variables(1)!.value()),
             pressure: Math.round(current.variables(6)!.value()),
             visibility: Math.round(current.variables(7)!.value() / 1000), // Convert to km
-            uvIndex: Math.round(current.variables(8)!.value()),
-            cloudCover: Math.round(current.variables(9)!.value()),
-            dewPoint: Math.round(current.variables(10)!.value()),
+            cloudCover: Math.round(current.variables(8)!.value()),
+            dewPoint: Math.round(current.variables(9)!.value()),
             isDay,
-            sunrise: formatTime(Number(daily.time(0)) + Number(daily.variables(0)!.value(0))),
-            sunset: formatTime(Number(daily.time(0)) + Number(daily.variables(1)!.value(0))),
           },
         });
 
@@ -271,13 +262,6 @@ export function WeatherCard() {
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Sun className="w-4 h-4 text-accent" />
-            <div>
-              <p className="text-muted-foreground text-xs">UV Index</p>
-              <p className="font-semibold">{current.uvIndex}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
             <Cloud className="w-4 h-4 text-accent" />
             <div>
               <p className="text-muted-foreground text-xs">Cloud Cover</p>
@@ -289,26 +273,6 @@ export function WeatherCard() {
             <div>
               <p className="text-muted-foreground text-xs">Dew Point</p>
               <p className="font-semibold">{current.dewPoint}°C</p>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="my-4" />
-
-        {/* Sunrise/Sunset */}
-        <div className="flex justify-center gap-8">
-          <div className="flex items-center gap-2 text-sm">
-            <Sunrise className="w-4 h-4 text-orange-500" />
-            <div className="text-center">
-              <p className="text-muted-foreground text-xs">Sunrise</p>
-              <p className="font-semibold">{current.sunrise}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Sunset className="w-4 h-4 text-orange-600" />
-            <div className="text-center">
-              <p className="text-muted-foreground text-xs">Sunset</p>
-              <p className="font-semibold">{current.sunset}</p>
             </div>
           </div>
         </div>
