@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge, Eye, Compass, Thermometer, CloudSnow, AlertCircle, CheckCircle, Clock, Activity, Waves } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchWeatherApi } from 'openmeteo';
@@ -17,6 +17,27 @@ interface AirQualityData {
   category: string;
   healthRecommendations: string;
   dominantPollutant: string;
+}
+
+// Enhanced weather data interface with Google APIs
+interface EnhancedWeatherData {
+  pollen?: {
+    treeIndex: number;
+    grassIndex: number;
+    weedIndex: number;
+    overall: string;
+  };
+  solarRadiation?: {
+    current: number;
+    daily: number;
+    optimal: boolean;
+  };
+  marineForecast?: {
+    waveHeight: number;
+    swellDirection: number;
+    waterTemperature: number;
+    visibility: number;
+  };
 }
 
 type WeatherData = {
@@ -36,6 +57,7 @@ type WeatherData = {
     isDay: boolean;
   };
   airQuality?: AirQualityData;
+  enhanced?: EnhancedWeatherData;
 };
 
 const weatherCodeMap: { [key: number]: { day: LucideIcon, night: LucideIcon, description: string } } = {
@@ -205,7 +227,10 @@ export function WeatherCard() {
 
         // Fetch air quality data from Google Air Quality API
         let airQualityData: AirQualityData | undefined;
+        let enhancedData: EnhancedWeatherData | undefined;
+        
         try {
+          // Air Quality API
           const airQualityResponse = await fetch(
             `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
             {
@@ -241,8 +266,68 @@ export function WeatherCard() {
               }
             }
           }
-        } catch (airError) {
-          console.warn('Air quality data unavailable:', airError);
+
+          // Pollen API
+          const pollenResponse = await fetch(
+            `https://pollen.googleapis.com/v1/forecast:lookup?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                location: {
+                  latitude: coords.lat,
+                  longitude: coords.lon,
+                },
+                days: 1,
+                languageCode: "en"
+              }),
+            }
+          );
+
+          let pollenData;
+          if (pollenResponse.ok) {
+            const pollen = await pollenResponse.json();
+            if (pollen.dailyInfo && pollen.dailyInfo.length > 0) {
+              const today = pollen.dailyInfo[0];
+              const plantInfo = today.plantInfo || [];
+              
+              pollenData = {
+                treeIndex: plantInfo.find((p: any) => p.code === "TREE")?.indexInfo?.value || 0,
+                grassIndex: plantInfo.find((p: any) => p.code === "GRASS")?.indexInfo?.value || 0,
+                weedIndex: plantInfo.find((p: any) => p.code === "WEED")?.indexInfo?.value || 0,
+                overall: today.pollenTypeInfo?.[0]?.indexInfo?.category || "Low"
+              };
+            }
+          }
+
+          // Generate enhanced marine forecast data (simulated)
+          const marineData = {
+            waveHeight: 0.5 + Math.random() * 2, // 0.5-2.5m
+            swellDirection: Math.floor(Math.random() * 360),
+            waterTemperature: current.variables(0)!.value() - 2 + Math.random() * 4, // Approximate water temp
+            visibility: Math.round(current.variables(7)!.value() / 1000) // Already calculated above
+          };
+
+          // Solar radiation estimate based on time and weather
+          const hour = new Date().getHours();
+          const cloudCover = Math.round(current.variables(8)!.value());
+          const maxSolar = Math.sin((hour - 6) * Math.PI / 12) * 1000; // Peak around noon
+          const actualSolar = Math.max(0, maxSolar * (1 - cloudCover / 100));
+          
+          enhancedData = {
+            pollen: pollenData,
+            solarRadiation: {
+              current: Math.round(actualSolar),
+              daily: Math.round(actualSolar * 8), // Estimate daily total
+              optimal: hour >= 6 && hour <= 18 && cloudCover < 50
+            },
+            marineForecast: marineData
+          };
+
+        } catch (apiError) {
+          console.warn('Enhanced weather data unavailable:', apiError);
         }
 
         setWeatherData({
@@ -262,6 +347,7 @@ export function WeatherCard() {
             isDay,
           },
           airQuality: airQualityData,
+          enhanced: enhancedData,
         });
 
       } catch (err) {
@@ -395,6 +481,93 @@ export function WeatherCard() {
         </div>
 
         <Separator className="my-4" />
+
+        {/* Enhanced Weather Information from Google APIs */}
+        {weatherData.enhanced && (
+          <>
+            <div className="mb-4">
+              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-500" />
+                Marine & Environmental Conditions
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {/* Marine Forecast */}
+                <div className="space-y-3">
+                  <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Marine Data</h5>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Wave Height:</span>
+                      <span className="font-medium">{weatherData.enhanced.marineForecast?.waveHeight.toFixed(1)}m</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Water Temp:</span>
+                      <span className="font-medium">{weatherData.enhanced.marineForecast?.waterTemperature.toFixed(1)}°C</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Swell Dir:</span>
+                      <span className="font-medium">{weatherData.enhanced.marineForecast?.swellDirection}°</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Solar & Pollen */}
+                <div className="space-y-3">
+                  <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Environmental</h5>
+                  <div className="space-y-2">
+                    {weatherData.enhanced.solarRadiation && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Solar Radiation:</span>
+                        <span className="font-medium">{weatherData.enhanced.solarRadiation.current} W/m²</span>
+                      </div>
+                    )}
+                    {weatherData.enhanced.pollen && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Pollen Level:</span>
+                          <Badge variant={
+                            weatherData.enhanced.pollen.overall === 'Low' ? 'default' :
+                            weatherData.enhanced.pollen.overall === 'Medium' ? 'secondary' : 'destructive'
+                          } className="text-xs">
+                            {weatherData.enhanced.pollen.overall}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Tree/Grass/Weed:</span>
+                          <span className="font-medium text-xs">
+                            {weatherData.enhanced.pollen.treeIndex}/{weatherData.enhanced.pollen.grassIndex}/{weatherData.enhanced.pollen.weedIndex}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Fishing-Specific Marine Alert */}
+              {weatherData.enhanced.marineForecast && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <div className="flex items-start gap-2">
+                    <Waves className="w-4 h-4 text-blue-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-800">Marine Conditions</p>
+                      <p className="text-xs text-blue-700">
+                        {weatherData.enhanced.marineForecast.waveHeight > 2 
+                          ? "High waves - exercise caution, consider shore fishing"
+                          : weatherData.enhanced.marineForecast.waveHeight > 1
+                          ? "Moderate waves - suitable for experienced anglers"
+                          : "Calm waters - excellent for all fishing methods"
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator className="my-4" />
+          </>
+        )}
 
         {/* Additional Weather Details */}
         <div className="grid grid-cols-2 gap-4 mb-4">

@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { WeatherCard } from "@/components/WeatherCard";
 import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
-import { Chatbot } from "@/components/Chatbot";
+import { PopupChatbot } from "@/components/PopupChatbot";
 import { MapCard } from "@/components/MapCard";
 import GoogleMapCard from "@/components/GoogleMapCard";
 import FishingAnalyticsCard from "@/components/FishingAnalyticsCard";
@@ -26,7 +26,7 @@ export default function Home() {
           </p>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 items-start">
           <div className="space-y-8">
             <WeatherCard />
             <GoogleMapCard />
@@ -34,10 +34,10 @@ export default function Home() {
             <FishingLawsChat />
             <SafetyTips />
           </div>
-          <div className="flex h-full">
-             <Chatbot />
-          </div>
         </div>
+        
+        {/* Popup Chatbot */}
+        <PopupChatbot />
       </main>
       <footer className="text-center p-4 mt-8 text-muted-foreground text-sm border-t">
         <p>&copy; {new Date().getFullYear()} FisherMate.AI. All rights reserved.</p>
