@@ -297,18 +297,18 @@ export function MapCard() {
 
     if (loading || !mapReady) {
         return (
-            <Card className="shadow-lg">
+            <Card className="modern-card-tall">
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <MapIcon className="w-6 h-6 text-primary" />
+                    <CardTitle className="flex items-center gap-2">
+                        <MapIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         {t('map_title')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="h-[400px] w-full rounded-lg border bg-muted flex flex-col items-center justify-center text-center p-4">
-                        <Loader2 className="w-8 h-8 mb-4 text-primary animate-spin" />
-                        <p className="font-bold">{t('getting_location')}</p>
-                        <p className="text-sm text-muted-foreground">{t('location_access_help')}</p>
+                    <div className="h-[400px] w-full rounded-lg glass-card-sm flex flex-col items-center justify-center text-center p-4">
+                        <Loader2 className="w-8 h-8 mb-4 text-blue-600 dark:text-blue-400 animate-spin" />
+                        <p className="font-semibold text-foreground">{t('getting_location')}</p>
+                        <p className="text-sm text-muted-foreground mt-2">{t('location_access_help')}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -316,20 +316,20 @@ export function MapCard() {
     }
 
     return (
-        <Card className="shadow-lg">
+        <Card className="modern-card-tall">
             <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <MapIcon className="w-6 h-6 text-primary" />
+                <CardTitle className="flex items-center gap-2">
+                    <MapIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     {t('map_title')}
                     {userLocation && (
-                        <Badge variant="outline" className="ml-2">
+                        <Badge variant="outline" className="ml-2 glass-card-sm">
                             <Navigation className="w-3 h-3 mr-1" />
                             Live
                         </Badge>
                     )}
                 </CardTitle>
                 {error && (
-                    <p className="text-sm text-amber-600 flex items-center gap-1">
+                    <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
                         <AlertTriangle className="w-4 h-4" />
                         {error}
                     </p>
@@ -342,7 +342,7 @@ export function MapCard() {
                         Found {fishingPOIs.length} {t('fishing_spots_nearby')}
                     </div>
                     
-                    <div className="h-[400px] w-full rounded-lg border overflow-hidden">
+                    <div className="h-[400px] w-full rounded-lg glass-card-sm overflow-hidden">
                         {leafletAvailable && MapContainer ? (
                             <MapContainer
                                 center={[userLocation?.lat || 17.6868, userLocation?.lng || 83.2185]}

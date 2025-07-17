@@ -72,20 +72,20 @@ export function Chatbot() {
   }
 
   return (
-    <Card className="shadow-lg flex flex-col w-full">
-       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2">
-          <Bot className="w-6 h-6 text-primary" />
+    <Card className="modern-card-tall flex flex-col">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           AI Assistant
         </CardTitle>
-        <CardDescription>Ask me anything!</CardDescription>
+        <CardDescription>Ask me anything about fishing!</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-0 min-h-0">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
           <div className="p-4 space-y-4">
-             {messages.length === 0 && (
+            {messages.length === 0 && (
               <div className="text-center text-muted-foreground p-8">
-                <MessageSquare className="mx-auto h-12 w-12 mb-4" />
+                <MessageSquare className="mx-auto h-12 w-12 mb-4 opacity-50" />
                 <p>Start a conversation by typing a message below.</p>
               </div>
             )}
@@ -98,40 +98,40 @@ export function Chatbot() {
                 )}
               >
                 {message.role === "model" && (
-                  <div className="p-2 bg-primary rounded-full text-primary-foreground">
-                    <Bot size={18} />
+                  <div className="p-2 glass-button-outline rounded-full">
+                    <Bot size={18} className="text-purple-600 dark:text-purple-400" />
                   </div>
                 )}
                 <div
                   className={cn(
                     "p-3 rounded-lg max-w-xs",
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                      ? "glass-button-primary text-white"
+                      : "glass-card-sm"
                   )}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 </div>
-                 {message.role === "user" && (
-                  <div className="p-2 bg-muted rounded-full">
-                    <User size={18} />
+                {message.role === "user" && (
+                  <div className="p-2 glass-button-outline rounded-full">
+                    <User size={18} className="text-blue-600 dark:text-blue-400" />
                   </div>
                 )}
               </div>
             ))}
-             {isLoading && (
+            {isLoading && (
               <div className="flex items-center gap-3">
-                 <div className="p-2 bg-primary rounded-full text-primary-foreground">
-                    <Bot size={18} />
-                  </div>
-                <div className="p-3 rounded-lg bg-muted">
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                <div className="p-2 glass-button-outline rounded-full">
+                  <Bot size={18} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="p-3 rounded-lg glass-card-sm">
+                  <Loader2 className="h-5 w-5 animate-spin text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
             )}
           </div>
         </ScrollArea>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-border/50">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
               <FormField
@@ -141,9 +141,10 @@ export function Chatbot() {
                   <FormItem className="flex-1">
                     <FormControl>
                       <Input
-                        placeholder="Ask me anything..."
+                        placeholder="Ask me anything about fishing..."
                         autoComplete="off"
                         disabled={isLoading}
+                        className="glass-input"
                         {...field}
                       />
                     </FormControl>
@@ -151,7 +152,7 @@ export function Chatbot() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="icon" disabled={isLoading}>
+              <Button type="submit" size="icon" disabled={isLoading} className="glass-button-primary">
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -162,7 +163,7 @@ export function Chatbot() {
             </form>
           </Form>
         </div>
-        </CardContent>
+      </CardContent>
     </Card>
   );
 }

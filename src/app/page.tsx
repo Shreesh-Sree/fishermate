@@ -49,40 +49,45 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-background gradient-bg">
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 px-4 md:px-8 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-cyan-500/5 to-teal-500/10"></div>
-          <div className="relative max-w-6xl mx-auto">
-            <h1 className="text-6xl lg:text-8xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent mb-8 tracking-tight leading-tight animate-fade-in">
+        <section className="relative py-20 lg:py-32 px-4 md:px-8 text-center">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-5xl lg:text-7xl font-bold text-gradient mb-8 tracking-tight leading-tight animate-fade-in">
               FisherMate.AI
             </h1>
-            <p className="text-2xl lg:text-3xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-12 animate-slide-in">
+            <p className="text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
               Your intelligent fishing companion powered by AI and real-time data
             </p>
             
             {/* Feature Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 mb-16">
-              <div className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur rounded-full shadow-lg">
-                <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-gray-700">Live Weather Data</span>
+            <div className="flex flex-wrap justify-center gap-4 mb-16">
+              <div className="glass-card-sm px-6 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="status-online"></div>
+                  <span className="font-medium text-foreground">Live Weather Data</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur rounded-full shadow-lg">
-                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-gray-700">Real-time Maps</span>
+              <div className="glass-card-sm px-6 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="status-online"></div>
+                  <span className="font-medium text-foreground">Real-time Maps</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur rounded-full shadow-lg">
-                <div className="w-4 h-4 bg-purple-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-gray-700">AI Assistant</span>
+              <div className="glass-card-sm px-6 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="status-online"></div>
+                  <span className="font-medium text-foreground">AI Assistant</span>
+                </div>
               </div>
             </div>
 
             {/* CTA Button */}
             <Link 
               href={user ? "/dashboard" : "/login"}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold text-lg rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg rounded-xl shadow-soft hover:scale-[1.02] transition-all duration-200 focus-ring"
             >
               <BarChart3 className="w-6 h-6" />
               {user ? "Go to Dashboard" : "Get Started"}
@@ -91,30 +96,29 @@ export default function Home() {
         </section>
 
         {/* Features Grid */}
-        <section className="py-20 px-4 md:px-8 bg-white/50">
+        <section className="py-20 px-4 md:px-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-center text-foreground mb-16">
               Explore Our Features
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((feature, index) => (
                 <Link
                   key={feature.title}
                   href={feature.href}
-                  className="group modern-card p-8 hover:shadow-2xl transition-all duration-300"
-                  style={{ animationDelay: `${index * 150}ms` }}
+                  className="group modern-card hover:scale-[1.02] transition-all duration-300 focus-ring"
                 >
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className="w-8 h-8 text-white" />
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-6`}>
+                    <feature.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     {feature.description}
                   </p>
-                  <div className="mt-6 flex items-center text-blue-600 font-medium group-hover:gap-3 transition-all duration-300">
+                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium group-hover:gap-2 transition-all duration-300">
                     Explore Feature
                     <span className="ml-2 group-hover:ml-0 transition-all duration-300">→</span>
                   </div>
@@ -125,42 +129,42 @@ export default function Home() {
         </section>
 
         {/* About Section */}
-        <section className="py-20 px-4 md:px-8">
+        <section className="py-20 px-4 md:px-8 bg-muted/30">
           <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-8">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-8">
               Why Choose FisherMate.AI?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-              <div className="modern-card p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-6 h-6 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <div className="glass-card-sm p-6">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Smart Location</h3>
-                <p className="text-gray-600">AI-powered location intelligence for the best fishing experiences</p>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Smart Location</h3>
+                <p className="text-muted-foreground">AI-powered location intelligence for the best fishing experiences</p>
               </div>
-              <div className="modern-card p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <CloudSun className="w-6 h-6 text-green-600" />
+              <div className="glass-card-sm p-6">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <CloudSun className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Real-time Data</h3>
-                <p className="text-gray-600">Live weather, water conditions, and environmental data</p>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Real-time Data</h3>
+                <p className="text-muted-foreground">Live weather, water conditions, and environmental data</p>
               </div>
-              <div className="modern-card p-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-6 h-6 text-purple-600" />
+              <div className="glass-card-sm p-6">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Safety First</h3>
-                <p className="text-gray-600">Comprehensive safety guidelines and legal compliance</p>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Safety First</h3>
+                <p className="text-muted-foreground">Comprehensive safety guidelines and legal compliance</p>
               </div>
             </div>
           </div>
         </section>
       </main>
       
-      <footer className="text-center p-8 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
+      <footer className="text-center p-8 bg-muted/20 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <p className="text-gray-600 text-sm">&copy; {new Date().getFullYear()} FisherMate.AI. All rights reserved.</p>
-          <p className="text-gray-500 text-xs mt-2">Powered by Google Maps Platform & Advanced AI</p>
+          <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} FisherMate.AI. All rights reserved.</p>
+          <p className="text-muted-foreground text-xs mt-2">Powered by Google Maps Platform & Advanced AI</p>
         </div>
       </footer>
     </div>
