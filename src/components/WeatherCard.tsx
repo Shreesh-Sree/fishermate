@@ -4,18 +4,21 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin } from "lucide-react";
+import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin, Gauge } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { fetchWeatherApi } from 'openmeteo';
 
 type WeatherData = {
   current: {
     location: string;
     temp: number;
+    apparentTemperature: number;
     condition: string;
     icon: LucideIcon;
     wind: number;
     humidity: number;
+    isDay: boolean;
   };
   forecast: {
     day: string;
@@ -24,24 +27,38 @@ type WeatherData = {
   }[];
 };
 
-const weatherIconMap: { [key: string]: LucideIcon } = {
-  "01d": Sun, "01n": Sun,
-  "02d": Cloudy, "02n": Cloudy,
-  "03d": Cloud, "03n": Cloud,
-  "04d": Cloud, "04n": Cloud,
-  "09d": CloudRain, "09n": CloudRain,
-  "10d": CloudRain, "10n": CloudRain,
-  "11d": CloudLightning, "11n": CloudLightning,
-  "13d": Snowflake, "13n": Snowflake,
-  "50d": Wind, "50n": Wind,
+const weatherCodeMap: { [key: number]: { day: LucideIcon, night: LucideIcon, description: string } } = {
+  0: { day: Sun, night: Sun, description: "Clear sky" },
+  1: { day: Cloudy, night: Cloudy, description: "Mainly clear" },
+  2: { day: Cloud, night: Cloud, description: "Partly cloudy" },
+  3: { day: Cloud, night: Cloud, description: "Overcast" },
+  45: { day: Wind, night: Wind, description: "Fog" },
+  48: { day: Wind, night: Wind, description: "Depositing rime fog" },
+  51: { day: CloudRain, night: CloudRain, description: "Light drizzle" },
+  53: { day: CloudRain, night: CloudRain, description: "Moderate drizzle" },
+  55: { day: CloudRain, night: CloudRain, description: "Dense drizzle" },
+  61: { day: CloudRain, night: CloudRain, description: "Slight rain" },
+  63: { day: CloudRain, night: CloudRain, description: "Moderate rain" },
+  66: { day: CloudRain, night: CloudRain, description: "Light freezing rain" },
+  67: { day: CloudRain, night: CloudRain, description: "Heavy freezing rain" },
+  71: { day: Snowflake, night: Snowflake, description: "Slight snow fall" },
+  73: { day: Snowflake, night: Snowflake, description: "Moderate snow fall" },
+  75: { day: Snowflake, night: Snowflake, description: "Heavy snow fall" },
+  77: { day: Snowflake, night: Snowflake, description: "Snow grains" },
+  80: { day: CloudRain, night: CloudRain, description: "Slight rain showers" },
+  81: { day: CloudRain, night: CloudRain, description: "Moderate rain showers" },
+  82: { day: CloudRain, night: CloudRain, description: "Violent rain showers" },
+  85: { day: Snowflake, night: Snowflake, description: "Slight snow showers" },
+  86: { day: Snowflake, night: Snowflake, description: "Heavy snow showers" },
+  95: { day: CloudLightning, night: CloudLightning, description: "Thunderstorm" },
+  96: { day: CloudLightning, night: CloudLightning, description: "Thunderstorm with slight hail" },
+  99: { day: CloudLightning, night: CloudLightning, description: "Thunderstorm with heavy hail" },
 };
 
-const getDayOfWeek = (dateString: string, locale: string) => {
-  const date = new Date(dateString);
+const getDayOfWeek = (date: Date, locale: string) => {
   return date.toLocaleDateString(locale, { weekday: 'short' });
 };
 
-const apiKey = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
 
 export function WeatherCard() {
   const { locale, t } = useLanguage();
@@ -75,45 +92,56 @@ export function WeatherCard() {
     async function fetchWeather(isInitialLoad = false) {
       if (!coords) return;
 
-      if (!apiKey) {
-        setError("OpenWeatherMap API key is missing.");
-        if (isInitialLoad) setLoading(false);
-        return;
-      }
-
       if (isInitialLoad) setLoading(true);
       setError(null);
 
-      const { lat, lon } = coords;
-
+      const params = {
+        "latitude": coords.lat,
+        "longitude": coords.lon,
+        "current": ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "weather_code", "wind_speed_10m", "is_day"],
+        "daily": ["weather_code", "temperature_2m_max"],
+        "timezone": "auto",
+      };
+      const url = "https://api.open-meteo.com/v1/forecast";
+      
       try {
-        const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
-        if (!currentRes.ok) throw new Error('Failed to fetch current weather');
-        const current = await currentRes.json();
+        const responses = await fetchWeatherApi(url, params);
+        const response = responses[0];
+        
+        const utcOffsetSeconds = response.utcOffsetSeconds();
+        const current = response.current()!;
+        const daily = response.daily()!;
 
-        const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
-        if (!forecastRes.ok) throw new Error('Failed to fetch forecast');
-        const forecast = await forecastRes.json();
-
-        const dailyForecasts = forecast.list
-          .filter((item: any, index: number) => index % 8 === 0)
-          .slice(0, 5)
-          .map((item: any) => ({
-            day: getDayOfWeek(item.dt_txt, locale),
-            temp: Math.round(item.main.temp),
-            icon: weatherIconMap[item.weather[0].icon] || Sun,
-          }));
+        const isDay = current.variables(5)!.value() === 1;
+        const weatherCode = current.variables(3)!.value();
+        const weatherInfo = weatherCodeMap[Math.round(weatherCode)] || weatherCodeMap[0];
+        
+        // Find city name from coordinates
+        const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lon}&localityLanguage=en`);
+        const geoData = await geoRes.json();
+        const locationName = `${geoData.city}, ${geoData.countryCode}`;
 
         setWeatherData({
           current: {
-            location: `${current.name}, ${current.sys.country}`,
-            temp: Math.round(current.main.temp),
-            condition: current.weather[0].main,
-            icon: weatherIconMap[current.weather[0].icon] || Sun,
-            wind: Math.round(current.wind.speed * 3.6),
-            humidity: current.main.humidity,
+            location: locationName,
+            temp: Math.round(current.variables(0)!.value()),
+            apparentTemperature: Math.round(current.variables(2)!.value()),
+            condition: weatherInfo.description,
+            icon: isDay ? weatherInfo.day : weatherInfo.night,
+            wind: Math.round(current.variables(4)!.value()),
+            humidity: Math.round(current.variables(1)!.value()),
+            isDay,
           },
-          forecast: dailyForecasts,
+          forecast: [...Array(5)].map((_, i) => {
+            const date = new Date((Number(daily.time(i)) + utcOffsetSeconds) * 1000);
+            const dailyCode = daily.variables(0)!.value(i);
+            const dailyWeatherInfo = weatherCodeMap[Math.round(dailyCode)] || weatherCodeMap[0];
+            return {
+              day: getDayOfWeek(date, locale),
+              temp: Math.round(daily.variables(1)!.value(i)),
+              icon: dailyWeatherInfo.day, // Always show day icon for forecast
+            };
+          }),
         });
 
       } catch (err) {
@@ -171,6 +199,10 @@ export function WeatherCard() {
             <div className="flex items-center gap-1">
               <Wind className="w-4 h-4" />
               <span>{current.wind} km/h</span>
+            </div>
+             <div className="flex items-center gap-1">
+              <Gauge className="w-4 h-4" />
+              <span>Feels like {current.apparentTemperature}°C</span>
             </div>
             <div className="flex items-center gap-1">
               <Droplets className="w-4 h-4" />
