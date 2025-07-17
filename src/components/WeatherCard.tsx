@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning } from "lucide-react";
+import { Sun, Cloud, CloudRain, Wind, Droplets, Cloudy, Navigation, Loader2, AlertTriangle, Snowflake, CloudLightning, MapPin } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type WeatherData = {
@@ -45,9 +45,33 @@ export function WeatherCard() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      setLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+      },
+      () => {
+        setError("Unable to retrieve your location. Please enable location services.");
+        setLoading(false);
+      }
+    );
+  }, []);
 
   useEffect(() => {
     async function fetchWeather() {
+      if (!coords) return;
+
       if (!apiKey) {
         setError("OpenWeatherMap API key is missing.");
         setLoading(false);
@@ -56,24 +80,20 @@ export function WeatherCard() {
 
       setLoading(true);
       setError(null);
-      
-      const lat = 9.9312; // Kochi latitude
-      const lon = 76.2673; // Kochi longitude
+
+      const { lat, lon } = coords;
 
       try {
-        // Fetch current weather
         const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
         if (!currentRes.ok) throw new Error('Failed to fetch current weather');
         const current = await currentRes.json();
 
-        // Fetch 5-day forecast
         const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
         if (!forecastRes.ok) throw new Error('Failed to fetch forecast');
         const forecast = await forecastRes.json();
 
-        // Process forecast data to get one entry per day
         const dailyForecasts = forecast.list
-          .filter((item: any, index: number) => index % 8 === 0) // Data is every 3 hours, so 8 points per day
+          .filter((item: any, index: number) => index % 8 === 0)
           .slice(0, 5)
           .map((item: any) => ({
             day: getDayOfWeek(item.dt_txt),
@@ -87,7 +107,7 @@ export function WeatherCard() {
             temp: Math.round(current.main.temp),
             condition: current.weather[0].main,
             icon: weatherIconMap[current.weather[0].icon] || Sun,
-            wind: Math.round(current.wind.speed * 3.6), // m/s to km/h
+            wind: Math.round(current.wind.speed * 3.6),
             humidity: current.main.humidity,
           },
           forecast: dailyForecasts,
@@ -105,7 +125,7 @@ export function WeatherCard() {
     }
 
     fetchWeather();
-  }, []);
+  }, [coords]);
 
   const renderContent = () => {
     if (loading) {
@@ -131,7 +151,7 @@ export function WeatherCard() {
     return (
       <>
         <div className="text-center">
-          <p className="text-muted-foreground">{current.location}</p>
+          <p className="text-muted-foreground flex items-center justify-center gap-1"><MapPin size={14}/> {current.location}</p>
           <div className="flex items-center justify-center gap-4 my-4">
             <current.icon className="w-20 h-20 text-accent" />
             <div>
