@@ -93,7 +93,11 @@ export function FishingLawsChat() {
   };
 
   async function onSubmit(values: z.infer<typeof fishingLawsSchema>) {
-    if (!values.state || !values.query.trim()) {
+    // Additional validation to prevent null values
+    const state = values.state?.trim();
+    const query = values.query?.trim();
+    
+    if (!state || !query) {
       toast({
         variant: "destructive",
         title: "Missing Information",
@@ -107,11 +111,11 @@ export function FishingLawsChat() {
     stopAndResetAudio();
 
     try {
-      console.log("Submitting fishing laws query:", values);
+      console.log("Submitting fishing laws query:", { state, query });
       
       const response = await handleFishingLaws({
-        state: values.state,
-        query: values.query.trim(),
+        state: state,
+        query: query,
       });
       
       console.log("Received response:", response);

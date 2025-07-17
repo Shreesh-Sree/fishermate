@@ -9,8 +9,8 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SummarizeFishingLawsInputSchema = z.object({
-  state: z.string().describe('The state for which to summarize fishing laws.'),
-  query: z.string().describe('The user query about fishing laws.'),
+  state: z.string().min(1, "State is required").describe('The state for which to summarize fishing laws.'),
+  query: z.string().min(1, "Query is required").describe('The user query about fishing laws.'),
 });
 export type SummarizeFishingLawsInput = z.infer<typeof SummarizeFishingLawsInputSchema>;
 
@@ -21,7 +21,28 @@ const SummarizeFishingLawsOutputSchema = z.object({
 export type SummarizeFishingLawsOutput = z.infer<typeof SummarizeFishingLawsOutputSchema>;
 
 export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Promise<SummarizeFishingLawsOutput> {
-  return summarizeFishingLawsFlow(input);
+  // Validate input before processing
+  if (!input || !input.state || !input.query) {
+    return {
+      summary: "Invalid input: Please provide both a state and a query about fishing laws.",
+      audio: undefined,
+    };
+  }
+  
+  // Ensure strings are properly trimmed
+  const cleanInput = {
+    state: input.state.trim(),
+    query: input.query.trim(),
+  };
+  
+  if (!cleanInput.state || !cleanInput.query) {
+    return {
+      summary: "Please provide both a valid state and a question about fishing laws.",
+      audio: undefined,
+    };
+  }
+  
+  return summarizeFishingLawsFlow(cleanInput);
 }
 
 const summarizeFishingLawsPrompt = ai.definePrompt({
@@ -58,10 +79,19 @@ const summarizeFishingLawsFlow = ai.defineFlow(
   },
   async (input) => {
     try {
+      // Additional validation within the flow
+      if (!input?.state || !input?.query || typeof input.state !== 'string' || typeof input.query !== 'string') {
+        console.error('Invalid input to fishing laws flow:', input);
+        return {
+          summary: "Invalid input provided. Please ensure both state and query are valid strings.",
+          audio: undefined,
+        };
+      }
+
       const {output: summary} = await summarizeFishingLawsPrompt(input);
       
-      if (!summary) {
-        throw new Error('No summary generated from AI model');
+      if (!summary || typeof summary !== 'string') {
+        throw new Error('No valid summary generated from AI model');
       }
 
       // Try to generate audio, but don't fail if it doesn't work
