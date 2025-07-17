@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -36,47 +37,48 @@ export function FishingLawsChat() {
       query: "What are the regulations for using fishing nets?",
     },
   });
+  
+  const stopAndResetAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.removeEventListener('ended', () => setIsPlaying(false));
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  };
 
   useEffect(() => {
-    const audio = audioRef.current;
-    const handleAudioEnd = () => setIsPlaying(false);
-
-    if (audio) {
-      audio.addEventListener('ended', handleAudioEnd);
-    }
-
+    // Cleanup audio on component unmount
     return () => {
-      if (audio) {
-        audio.pause();
-        audio.removeEventListener('ended', handleAudioEnd);
-      }
+      stopAndResetAudio();
     };
-  }, [result]);
+  }, []);
+
 
   const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    if (!audioRef.current) return;
+  
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
   async function onSubmit(values: z.infer<typeof fishingLawsSchema>) {
     setIsLoading(true);
     setResult(null);
-    if(audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
+    stopAndResetAudio();
 
     try {
       const response = await handleFishingLaws(values);
       setResult(response);
       if (response.audio) {
-        audioRef.current = new Audio(response.audio);
+        const audio = new Audio(response.audio);
+        audio.setAttribute('playsinline', 'true');
+        audio.addEventListener('ended', () => setIsPlaying(false));
+        audioRef.current = audio;
       }
     } catch (error) {
       console.error("Error fetching fishing laws:", error);
@@ -151,7 +153,13 @@ export function FishingLawsChat() {
             </Button>
           </form>
         </Form>
-        {result && (
+        {isLoading && (
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg flex items-center justify-center">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+              <p>{t('ai_summary_title')}...</p>
+            </div>
+        )}
+        {result && !isLoading && (
           <div className="mt-6 p-4 bg-muted/50 rounded-lg">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-bold font-headline text-primary">{t('ai_summary_title')}</h4>

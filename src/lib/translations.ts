@@ -22,6 +22,7 @@ const en = {
   get_guidelines_button: "Get Guidelines",
   translated_query_title: "Translated Query",
   safety_guidelines_title: "Safety Guidelines",
+  fetching_summary: "Fetching summary",
 };
 
 const ta = {
@@ -47,6 +48,7 @@ const ta = {
   get_guidelines_button: "வழிகாட்டுதல்களைப் பெறுங்கள்",
   translated_query_title: "மொழிபெயர்க்கப்பட்ட கேள்வி",
   safety_guidelines_title: "பாதுகாப்பு வழிகாட்டுதல்கள்",
+  fetching_summary: "சுருக்கம் எடுக்கப்படுகிறது",
 };
 
 export const translations = { en, ta };
