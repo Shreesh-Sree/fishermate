@@ -7,49 +7,66 @@ import dynamic from 'next/dynamic';
 import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
-// Dynamically import Leaflet components to avoid SSR issues
-const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+// Check if leaflet packages are available
+let MapContainer: any = null;
+let TileLayer: any = null;
+let Marker: any = null;
+let Popup: any = null;
+let L: any = null;
+let leafletAvailable = false;
 
-// Import Leaflet CSS
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+try {
+  // Try to import Leaflet components dynamically
+  if (typeof window !== 'undefined') {
+    MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
+    TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
+    Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
+    Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
+    L = require('leaflet');
+    require('leaflet/dist/leaflet.css');
+    leafletAvailable = true;
+  }
+} catch (error) {
+  console.log('Leaflet not available, using fallback map');
+  leafletAvailable = false;
+}
 
-// Custom CSS for markers
-const markerStyles = `
-  .custom-marker {
-    background: transparent !important;
-    border: none !important;
-  }
-  .user-location-marker {
-    background: transparent !important;
-    border: none !important;
-  }
-  .leaflet-popup-content-wrapper {
-    border-radius: 8px;
-  }
-  .leaflet-popup-tip {
-    background: white;
-  }
-`;
-
-// Inject styles
-if (typeof document !== 'undefined') {
+// Custom CSS for markers (only if leaflet is available)
+if (typeof document !== 'undefined' && leafletAvailable) {
+  const markerStyles = `
+    .custom-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+    .user-location-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+    }
+    .leaflet-popup-tip {
+      background: white;
+    }
+  `;
+  
   const styleSheet = document.createElement('style');
   styleSheet.textContent = markerStyles;
   document.head.appendChild(styleSheet);
 }
 
-// Fix for default markers in Leaflet
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  });
+// Fix for default markers in Leaflet (only if available)
+if (typeof window !== 'undefined' && leafletAvailable && L) {
+  try {
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    });
+  } catch (e) {
+    console.log('Leaflet icon setup failed');
+  }
 }
 
 type FishingPOI = {
@@ -129,6 +146,8 @@ const generateFishingPOIs = (userLat: number, userLng: number): FishingPOI[] => 
 };
 
 const getMarkerIcon = (type: FishingPOI['type']) => {
+  if (!leafletAvailable || !L) return null;
+  
   const iconHtml = (emoji: string) => `
     <div style="
       background: white;
@@ -195,6 +214,8 @@ const getMarkerIcon = (type: FishingPOI['type']) => {
 
 // User location marker icon
 const getUserLocationIcon = () => {
+  if (!leafletAvailable || !L) return null;
+  
   return new L.DivIcon({
     html: `
       <div style="
@@ -210,6 +231,18 @@ const getUserLocationIcon = () => {
     iconSize: [20, 20],
     iconAnchor: [10, 10]
   });
+};
+
+// Simple emoji icon getter for fallback
+const getEmojiIcon = (type: FishingPOI['type']) => {
+  switch (type) {
+    case 'harbor': return '⚓';
+    case 'market': return '🐟';
+    case 'station': return '🛡️';
+    case 'zone': return '🎣';
+    case 'dock': return '🚢';
+    default: return '📍';
+  }
 };
 
 export function MapCard() {
@@ -310,61 +343,115 @@ export function MapCard() {
                     </div>
                     
                     <div className="h-[400px] w-full rounded-lg border overflow-hidden">
-                        <MapContainer
-                            center={[userLocation?.lat || 17.6868, userLocation?.lng || 83.2185]}
-                            zoom={13}
-                            style={{ height: '100%', width: '100%' }}
-                            scrollWheelZoom={true}
-                        >
-                            <TileLayer
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            />
-                            
-                            {/* User Location Marker */}
-                            {userLocation && (
-                                <Marker
-                                    position={[userLocation.lat, userLocation.lng]}
-                                    icon={getUserLocationIcon()}
-                                >
-                                    <Popup>
-                                        <div className="text-center">
-                                            <strong>📍 Your Location</strong>
-                                            <br />
-                                            <small>Lat: {userLocation.lat.toFixed(4)}, Lng: {userLocation.lng.toFixed(4)}</small>
+                        {leafletAvailable && MapContainer ? (
+                            <MapContainer
+                                center={[userLocation?.lat || 17.6868, userLocation?.lng || 83.2185]}
+                                zoom={13}
+                                style={{ height: '100%', width: '100%' }}
+                                scrollWheelZoom={true}
+                            >
+                                <TileLayer
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                
+                                {/* User Location Marker */}
+                                {userLocation && (
+                                    <Marker
+                                        position={[userLocation.lat, userLocation.lng]}
+                                        icon={getUserLocationIcon()}
+                                    >
+                                        <Popup>
+                                            <div className="text-center">
+                                                <strong>📍 Your Location</strong>
+                                                <br />
+                                                <small>Lat: {userLocation.lat.toFixed(4)}, Lng: {userLocation.lng.toFixed(4)}</small>
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                )}
+                                
+                                {/* Fishing POI Markers */}
+                                {fishingPOIs.map((poi) => (
+                                    <Marker
+                                        key={poi.id}
+                                        position={[poi.position.lat, poi.position.lng]}
+                                        icon={getMarkerIcon(poi.type)}
+                                        eventHandlers={{
+                                            click: () => setSelectedPOI(poi),
+                                        }}
+                                    >
+                                        <Popup>
+                                            <div className="p-2 max-w-xs">
+                                                <h3 className="font-semibold text-sm flex items-center gap-1">
+                                                    <span>{getEmojiIcon(poi.type)}</span>
+                                                    {poi.name}
+                                                </h3>
+                                                <p className="text-xs text-gray-600 mt-1">{poi.description}</p>
+                                                {poi.distance && (
+                                                    <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                                                        <MapPin className="w-3 h-3" />
+                                                        {poi.distance} km away
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                ))}
+                            </MapContainer>
+                        ) : (
+                            // Fallback static map display
+                            <div className="h-full w-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 flex flex-col items-center justify-center relative overflow-hidden">
+                                {/* Background pattern */}
+                                <div className="absolute inset-0 opacity-10">
+                                    <div className="grid grid-cols-8 grid-rows-6 h-full w-full">
+                                        {Array.from({ length: 48 }).map((_, i) => (
+                                            <div key={i} className="border border-blue-200 dark:border-blue-800"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Static map content */}
+                                <div className="relative z-10 text-center p-4">
+                                    <MapIcon className="w-16 h-16 mb-4 text-blue-600 mx-auto" />
+                                    <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">
+                                        Interactive Map
+                                    </h3>
+                                    <p className="text-sm text-blue-700 dark:text-blue-200 mb-4">
+                                        Install react-leaflet to enable interactive mapping
+                                    </p>
+                                    
+                                    {/* User location display */}
+                                    {userLocation && (
+                                        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-4 shadow-md">
+                                            <div className="flex items-center justify-center gap-2 text-sm">
+                                                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                                                <span className="font-medium">Your Location</span>
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-1">
+                                                {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                                            </div>
                                         </div>
-                                    </Popup>
-                                </Marker>
-                            )}
-                            
-                            {/* Fishing POI Markers */}
-                            {fishingPOIs.map((poi) => (
-                                <Marker
-                                    key={poi.id}
-                                    position={[poi.position.lat, poi.position.lng]}
-                                    icon={getMarkerIcon(poi.type)}
-                                    eventHandlers={{
-                                        click: () => setSelectedPOI(poi),
-                                    }}
-                                >
-                                    <Popup>
-                                        <div className="p-2 max-w-xs">
-                                            <h3 className="font-semibold text-sm flex items-center gap-1">
-                                                <span>{poi.type === 'harbor' ? '⚓' : poi.type === 'market' ? '🐟' : poi.type === 'station' ? '🛡️' : poi.type === 'zone' ? '🎣' : '🚢'}</span>
-                                                {poi.name}
-                                            </h3>
-                                            <p className="text-xs text-gray-600 mt-1">{poi.description}</p>
-                                            {poi.distance && (
-                                                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
-                                                    <MapPin className="w-3 h-3" />
-                                                    {poi.distance} km away
-                                                </p>
-                                            )}
-                                        </div>
-                                    </Popup>
-                                </Marker>
-                            ))}
-                        </MapContainer>
+                                    )}
+                                    
+                                    {/* POI indicators */}
+                                    <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+                                        {fishingPOIs.slice(0, 6).map((poi) => (
+                                            <div
+                                                key={poi.id}
+                                                className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm"
+                                            >
+                                                <div className="text-lg mb-1">{getEmojiIcon(poi.type)}</div>
+                                                <div className="text-xs font-medium truncate">{poi.name}</div>
+                                                {poi.distance && (
+                                                    <div className="text-xs text-muted-foreground">{poi.distance}km</div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Quick POI List */}
