@@ -31,8 +31,8 @@ const prebuiltQuestions = [
 ];
 
 const fishingLawsSchema = z.object({
-  query: z.string().min(5, { message: "Please enter a question (minimum 5 characters)." }),
-  state: z.string({ required_error: "Please select a state." }),
+  query: z.string().min(3, { message: "Please enter a question (minimum 3 characters)." }),
+  state: z.string().min(1, { message: "Please select a state." }),
 });
 
 export function FishingLawsChat() {
@@ -107,27 +107,39 @@ export function FishingLawsChat() {
     stopAndResetAudio();
 
     try {
+      console.log("Submitting fishing laws query:", values);
+      
       const response = await handleFishingLaws({
         state: values.state,
         query: values.query.trim(),
       });
       
+      console.log("Received response:", response);
+      
       if (response?.summary) {
         setResult(response);
+        
+        // Handle audio setup with better error handling
         if (response.audio) {
-          const audio = new Audio(response.audio);
-          audio.setAttribute('playsinline', 'true');
-          audio.addEventListener('ended', () => setIsPlaying(false));
-          audio.addEventListener('error', () => {
-            console.error("Audio failed to load");
-            toast({
-              variant: "destructive",
-              title: "Audio Error",
-              description: "Audio playback is not available for this response.",
+          try {
+            const audio = new Audio(response.audio);
+            audio.setAttribute('playsinline', 'true');
+            audio.addEventListener('ended', () => setIsPlaying(false));
+            audio.addEventListener('error', (e) => {
+              console.warn("Audio failed to load:", e);
+              // Don't show error toast for audio issues, just continue without audio
             });
-          });
-          audioRef.current = audio;
+            audioRef.current = audio;
+          } catch (audioError) {
+            console.warn("Audio setup failed:", audioError);
+            // Continue without audio
+          }
         }
+        
+        toast({
+          title: "Success",
+          description: "Fishing laws information retrieved successfully.",
+        });
       } else {
         throw new Error("No summary received from the server");
       }
@@ -238,7 +250,7 @@ export function FishingLawsChat() {
         {isLoading && (
             <div className="mt-6 p-4 bg-muted/50 rounded-lg flex items-center justify-center">
               <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-              <p>{t('ai_summary_title')}...</p>
+              <p>{t('fetching_summary')}...</p>
             </div>
         )}
         {result && !isLoading && (
@@ -251,7 +263,9 @@ export function FishingLawsChat() {
                 </Button>
               )}
             </div>
-            <p className="whitespace-pre-wrap text-sm">{result.summary}</p>
+            <div className="prose prose-sm max-w-none">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">{result.summary}</p>
+            </div>
           </div>
         )}
       </CardContent>
