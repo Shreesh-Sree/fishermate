@@ -4,4 +4,16 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 3
+  
+  # Environment variables for production
+  env:
+    NODE_ENV: production
+    
+  # CPU and memory configuration for better performance
+  cpu: 1
+  memory: 2Gi
+  
+  # Health check configuration
+  healthCheckConfig:
+    path: "/api/health"
