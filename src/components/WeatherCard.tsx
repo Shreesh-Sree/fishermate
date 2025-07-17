@@ -214,8 +214,8 @@ export function WeatherCard() {
         <div>
           <h3 className="text-center font-bold mb-4">{t('forecast_title')}</h3>
           <div className="flex justify-between">
-            {forecast.map((day) => (
-              <div key={day.day} className="flex flex-col items-center gap-2 text-sm">
+            {forecast.map((day, index) => (
+              <div key={`${day.day}-${index}`} className="flex flex-col items-center gap-2 text-sm">
                 <p className="font-medium text-muted-foreground">{day.day}</p>
                 <day.icon className="w-8 h-8 text-primary" />
                 <p className="font-bold">{day.temp}°C</p>
