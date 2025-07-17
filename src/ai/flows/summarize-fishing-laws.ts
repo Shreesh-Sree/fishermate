@@ -31,7 +31,7 @@ export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Pr
 const summarizeFishingLawsPrompt = ai.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
-  output: {schema: z.string()},
+  output: {schema: z.string().nullable()},
   prompt: `You are an expert on Indian fishing laws. Provide a concise summary of the fishing laws for the state of {{state}} based on the following query:
 
 Query: "{{query}}"
