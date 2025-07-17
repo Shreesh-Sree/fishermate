@@ -56,7 +56,7 @@ export function Chatbot() {
         message: values.message,
         history: messages,
       });
-      const modelMessage: Message = { role: "model", content: response.response };
+      const modelMessage: Message = { role: "model", content: response.content };
       setMessages((prev) => [...prev, modelMessage]);
     } catch (error) {
       console.error("Chat error:", error);

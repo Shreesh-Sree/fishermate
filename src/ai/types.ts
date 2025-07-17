@@ -12,6 +12,6 @@ export const ChatInputSchema = z.object({
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 export const ChatOutputSchema = z.object({
-  response: z.string().describe('The AI response.'),
+  content: z.string().describe('The AI response.'),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;

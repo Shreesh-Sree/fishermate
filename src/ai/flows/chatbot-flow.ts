@@ -19,7 +19,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a helpful assistant.
 
 {{#each history}}
-{{#if (this.role === 'user')}}
+{{#if this.isUser}}
 User: {{{this.content}}}
 {{else}}
 Assistant: {{{this.content}}}
@@ -37,7 +37,11 @@ const chatbotFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const history = input.history.map(h => ({
+      ...h,
+      isUser: h.role === 'user',
+    }));
+    const {output} = await prompt({...input, history});
     return output!;
   }
 );
