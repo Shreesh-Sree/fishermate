@@ -1,4 +1,4 @@
-import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle } from 'lucide-react';
+import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle, LogIn, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
   const { setLocale, t } = useLanguage();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
@@ -48,6 +50,36 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Authentication Button */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                  <User className="h-[1.2rem] w-[1.2rem]" />
+                  <span className="sr-only">User Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  {user.email}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login">
+              <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
+          )}
+
           {/* Mobile Navigation Dropdown */}
           <div className="md:hidden">
             <DropdownMenu>

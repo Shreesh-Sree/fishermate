@@ -2,11 +2,13 @@
 
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { MapPin, CloudSun, Shield, Scale, BarChart3, MessageCircle } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   const features = [
     {
@@ -79,11 +81,11 @@ export default function Home() {
 
             {/* CTA Button */}
             <Link 
-              href="/dashboard"
+              href={user ? "/dashboard" : "/login"}
               className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold text-lg rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             >
               <BarChart3 className="w-6 h-6" />
-              Get Started
+              {user ? "Go to Dashboard" : "Get Started"}
             </Link>
           </div>
         </section>
