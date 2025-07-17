@@ -1,4 +1,4 @@
-import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings } from 'lucide-react';
+import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,13 @@ export function Header() {
   const { setTheme, theme } = useTheme();
   const { setLocale, t } = useLanguage();
 
+  const navItems = [
+    { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/map", label: "Map", icon: MapPin },
+    { href: "/laws", label: "Laws", icon: Scale },
+    { href: "/safety", label: "Safety", icon: Shield },
+  ];
+
   return (
     <header className="py-4 px-6 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 border-b shadow-lg sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between">
@@ -24,7 +31,44 @@ export function Header() {
           </div>
           <h1 className="text-2xl font-headline font-bold tracking-tight animate-shimmer">{t('app_title')}</h1>
         </Link>
-        <div className="flex items-center gap-4">{/****/}
+        
+        {/* Navigation Links */}
+        <nav className="hidden md:flex items-center gap-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-2 px-4 py-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+            >
+              <item.icon className="w-4 h-4" />
+              <span className="font-medium">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-4">
+          {/* Mobile Navigation Dropdown */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                  <Settings className="h-[1.2rem] w-[1.2rem]" />
+                  <span className="sr-only">Navigation Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {navItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild>
+                    <Link href={item.href} className="flex items-center gap-2">
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
@@ -45,7 +89,7 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
-                <Settings className="h-[1.2rem] w-[1.2rem]" />
+                <Info className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Settings and Help</span>
               </Button>
             </DropdownMenuTrigger>
