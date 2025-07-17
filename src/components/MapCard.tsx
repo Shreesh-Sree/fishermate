@@ -7,67 +7,44 @@ import dynamic from 'next/dynamic';
 import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
-// Check if leaflet packages are available
-let MapContainer: any = null;
-let TileLayer: any = null;
-let Marker: any = null;
-let Popup: any = null;
-let L: any = null;
-let leafletAvailable = false;
+// Dynamically import Leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { 
+  ssr: false,
+  loading: () => <div className="h-full w-full flex items-center justify-center">Loading map...</div>
+});
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
 
-try {
-  // Try to import Leaflet components dynamically
-  if (typeof window !== 'undefined') {
-    MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), { ssr: false });
-    TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), { ssr: false });
-    Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false });
-    Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false });
-    L = require('leaflet');
-    require('leaflet/dist/leaflet.css');
-    leafletAvailable = true;
-  }
-} catch (error) {
-  console.log('Leaflet not available, using fallback map');
-  leafletAvailable = false;
-}
+// Hook to initialize Leaflet
+const useLeaflet = () => {
+  const [L, setL] = useState<any>(null);
+  const [isReady, setIsReady] = useState(false);
 
-// Custom CSS for markers (only if leaflet is available)
-if (typeof document !== 'undefined' && leafletAvailable) {
-  const markerStyles = `
-    .custom-marker {
-      background: transparent !important;
-      border: none !important;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('leaflet').then((leaflet) => {
+        import('leaflet/dist/leaflet.css');
+        
+        // Fix for default markers
+        delete (leaflet.default.Icon.Default.prototype as any)._getIconUrl;
+        leaflet.default.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        });
+        
+        setL(leaflet.default);
+        setIsReady(true);
+      }).catch((error) => {
+        console.error('Failed to load Leaflet:', error);
+        setIsReady(false);
+      });
     }
-    .user-location-marker {
-      background: transparent !important;
-      border: none !important;
-    }
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-    }
-    .leaflet-popup-tip {
-      background: white;
-    }
-  `;
-  
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = markerStyles;
-  document.head.appendChild(styleSheet);
-}
+  }, []);
 
-// Fix for default markers in Leaflet (only if available)
-if (typeof window !== 'undefined' && leafletAvailable && L) {
-  try {
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    });
-  } catch (e) {
-    console.log('Leaflet icon setup failed');
-  }
-}
+  return { L, isReady };
+};
 
 type FishingPOI = {
   id: string;
@@ -145,8 +122,8 @@ const generateFishingPOIs = (userLat: number, userLng: number): FishingPOI[] => 
   }));
 };
 
-const getMarkerIcon = (type: FishingPOI['type']) => {
-  if (!leafletAvailable || !L) return null;
+const getMarkerIcon = (type: FishingPOI['type'], L: any) => {
+  if (!L) return null;
   
   const iconHtml = (emoji: string) => `
     <div style="
@@ -213,8 +190,8 @@ const getMarkerIcon = (type: FishingPOI['type']) => {
 };
 
 // User location marker icon
-const getUserLocationIcon = () => {
-  if (!leafletAvailable || !L) return null;
+const getUserLocationIcon = (L: any) => {
+  if (!L) return null;
   
   return new L.DivIcon({
     html: `
@@ -247,6 +224,7 @@ const getEmojiIcon = (type: FishingPOI['type']) => {
 
 export function MapCard() {
     const { t } = useLanguage();
+    const { L, isReady: leafletReady } = useLeaflet();
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [fishingPOIs, setFishingPOIs] = useState<FishingPOI[]>([]);
     const [selectedPOI, setSelectedPOI] = useState<FishingPOI | null>(null);
@@ -257,6 +235,34 @@ export function MapCard() {
     useEffect(() => {
         // Set map ready after component mounts (for SSR compatibility)
         setMapReady(true);
+        
+        // Add custom styles for map markers
+        if (typeof document !== 'undefined') {
+            const markerStyles = `
+                .custom-marker {
+                    background: transparent !important;
+                    border: none !important;
+                }
+                .user-location-marker {
+                    background: transparent !important;
+                    border: none !important;
+                }
+                .leaflet-popup-content-wrapper {
+                    border-radius: 8px;
+                }
+                .leaflet-popup-tip {
+                    background: white;
+                }
+            `;
+            
+            const styleId = 'leaflet-custom-styles';
+            if (!document.getElementById(styleId)) {
+                const styleSheet = document.createElement('style');
+                styleSheet.id = styleId;
+                styleSheet.textContent = markerStyles;
+                document.head.appendChild(styleSheet);
+            }
+        }
     }, []);
 
     useEffect(() => {
@@ -295,7 +301,7 @@ export function MapCard() {
         );
     }, []);
 
-    if (loading || !mapReady) {
+    if (loading || !mapReady || !leafletReady) {
         return (
             <Card className="modern-card-tall">
                 <CardHeader>
@@ -343,7 +349,7 @@ export function MapCard() {
                     </div>
                     
                     <div className="h-[400px] w-full rounded-lg glass-card-sm overflow-hidden">
-                        {leafletAvailable && MapContainer ? (
+                        {leafletReady && L && MapContainer ? (
                             <MapContainer
                                 center={[userLocation?.lat || 17.6868, userLocation?.lng || 83.2185]}
                                 zoom={13}
@@ -359,7 +365,7 @@ export function MapCard() {
                                 {userLocation && (
                                     <Marker
                                         position={[userLocation.lat, userLocation.lng]}
-                                        icon={getUserLocationIcon()}
+                                        icon={getUserLocationIcon(L)}
                                     >
                                         <Popup>
                                             <div className="text-center">
@@ -376,7 +382,7 @@ export function MapCard() {
                                     <Marker
                                         key={poi.id}
                                         position={[poi.position.lat, poi.position.lng]}
-                                        icon={getMarkerIcon(poi.type)}
+                                        icon={getMarkerIcon(poi.type, L)}
                                         eventHandlers={{
                                             click: () => setSelectedPOI(poi),
                                         }}
@@ -463,7 +469,7 @@ export function MapCard() {
                                 onClick={() => setSelectedPOI(poi)}
                             >
                                 <div className="font-medium flex items-center gap-1">
-                                    <span>{getMarkerIcon(poi.type)}</span>
+                                    <span>{getEmojiIcon(poi.type)}</span>
                                     {poi.name}
                                 </div>
                                 {poi.distance && (
