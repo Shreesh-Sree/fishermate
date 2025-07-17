@@ -52,12 +52,9 @@ export function Chatbot() {
     form.reset();
 
     try {
-      // Provide only the user's message history for cleaner context.
-      const history = newMessages.filter(m => m.role === 'user');
-
       const response = await handleChat({
         message: values.message,
-        history: history,
+        history: newMessages.slice(0, -1), // Send all messages except the current one
       });
 
       const modelMessage: Message = { role: "model", content: response.content };
