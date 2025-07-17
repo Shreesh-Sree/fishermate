@@ -19,7 +19,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a helpful assistant.
 
 {{#each history}}
-{{#if (eq this.role 'user')}}
+{{#if (this.role === 'user')}}
 User: {{{this.content}}}
 {{else}}
 Assistant: {{{this.content}}}
