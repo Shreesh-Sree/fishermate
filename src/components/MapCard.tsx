@@ -22,7 +22,7 @@ export function MapCard() {
                 <div className="h-[400px] w-full rounded-lg border bg-muted flex flex-col items-center justify-center text-center p-4">
                   <MapIcon className="w-12 h-12 mb-4 text-muted-foreground" />
                   <p className="font-bold">Map is in Demo Mode</p>
-                  <p className="text-sm text-muted-foreground">Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file to enable the interactive map.</p>
+                  <p className="text-sm text-muted-foreground">To enable the interactive map, please provide a valid Google Maps API key with the correct domain restrictions.</p>
                 </div>
             </CardContent>
         </Card>
