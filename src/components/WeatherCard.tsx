@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CloudSun, Droplets, Wind, Eye, Thermometer, Gauge, Sun, Moon, CloudRain, Umbrella, Navigation, Waves, Zap, AlertTriangle } from 'lucide-react';
+import { CloudSun, Droplets, Wind, Eye, Thermometer, Gauge, Sun, Moon, CloudRain, Umbrella, Navigation, Waves, Zap, AlertTriangle, Cloud, Cloudy, Snowflake, CheckCircle, type LucideIcon } from 'lucide-react';
 
 interface WeatherData {
   current: {
