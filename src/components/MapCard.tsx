@@ -1,69 +1,57 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Map } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { Map as MapIcon, AlertTriangle } from "lucide-react";
+import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 
-// Fix for default icon issue with React-Leaflet
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-// This delete and mergeOptions is a common fix for icon path issues in React-Leaflet with bundlers like Webpack.
-// It ensures that Leaflet can find the icon image files correctly.
-delete (L.Icon.Default.prototype as any)._getIconUrl;  
-L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon.src,
-    iconRetinaUrl: markerIcon2x.src,
-    shadowUrl: markerShadow.src,
-});
+export function MapCard() {
+    const position = { lat: 16.506, lng: 80.648 };
 
-
-function MapCard() {
-    const [isMounted, setIsMounted] = useState(false);
-    const position: [number, number] = [16.506, 80.648];
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted) {
-        return (
-            <div className="h-[448px] w-full rounded-lg border flex items-center justify-center">
-                <p>Loading map...</p>
-            </div>
-        );
+    if (!apiKey) {
+      return (
+        <Card className="shadow-lg">
+           <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <MapIcon className="w-6 h-6 text-primary" />
+                    Map
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="h-[400px] w-full rounded-lg border bg-muted flex flex-col items-center justify-center text-center p-4">
+                  <AlertTriangle className="w-12 h-12 mb-4 text-destructive" />
+                  <p className="font-bold">Google Maps API Key Missing</p>
+                  <p className="text-sm text-muted-foreground">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.</p>
+                </div>
+            </CardContent>
+        </Card>
+      );
     }
 
     return (
         <Card className="shadow-lg">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                    <Map className="w-6 h-6 text-primary" />
+                    <MapIcon className="w-6 h-6 text-primary" />
                     Map
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="h-[400px] w-full rounded-lg border">
-                    <MapContainer center={position} zoom={6} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <Marker position={position}>
-                            <Popup>
-                                Bay of Bengal.
-                            </Popup>
-                        </Marker>
-                    </MapContainer>
+                <div className="h-[400px] w-full rounded-lg border overflow-hidden">
+                  <APIProvider apiKey={apiKey}>
+                      <Map
+                        defaultCenter={position}
+                        defaultZoom={6}
+                        gestureHandling={'greedy'}
+                        disableDefaultUI={true}
+                        mapId="seaGuideMap"
+                      >
+                         <Marker position={position} />
+                      </Map>
+                  </APIProvider>
                 </div>
             </CardContent>
         </Card>
     );
 }
-
-// Export as default for easier dynamic import
-export default MapCard;
