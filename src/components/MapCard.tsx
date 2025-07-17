@@ -7,7 +7,7 @@ import { APIProvider, Map, Marker, InfoWindow } from '@vis.gl/react-google-maps'
 import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const apiKey = NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 type FishingPOI = {
   id: string;
