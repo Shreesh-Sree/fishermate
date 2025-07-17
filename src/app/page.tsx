@@ -6,6 +6,8 @@ import { SafetyTips } from "@/components/SafetyTips";
 import { FishingLawsChat } from "@/components/FishingLawsChat";
 import { Chatbot } from "@/components/Chatbot";
 import { MapCard } from "@/components/MapCard";
+import GoogleMapCard from "@/components/GoogleMapCard";
+import FishingAnalyticsCard from "@/components/FishingAnalyticsCard";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Home() {
@@ -27,7 +29,8 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="space-y-8">
             <WeatherCard />
-            <MapCard />
+            <GoogleMapCard />
+            <FishingAnalyticsCard />
             <FishingLawsChat />
             <SafetyTips />
           </div>

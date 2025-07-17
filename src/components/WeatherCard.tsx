@@ -11,6 +11,14 @@ import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchWeatherApi } from 'openmeteo';
 
+// Air Quality interface for Google Air Quality API
+interface AirQualityData {
+  aqi: number;
+  category: string;
+  healthRecommendations: string;
+  dominantPollutant: string;
+}
+
 type WeatherData = {
   current: {
     location: string;
@@ -27,6 +35,7 @@ type WeatherData = {
     dewPoint: number;
     isDay: boolean;
   };
+  airQuality?: AirQualityData;
 };
 
 const weatherCodeMap: { [key: number]: { day: LucideIcon, night: LucideIcon, description: string } } = {
@@ -75,7 +84,7 @@ const formatTime = (timestamp: number): string => {
   });
 };
 
-const getFishingRecommendation = (weatherData: WeatherData['current']) => {
+const getFishingRecommendation = (weatherData: WeatherData['current'], airQuality?: AirQualityData) => {
   const { wind, condition, temp, visibility } = weatherData;
   
   // Poor conditions
@@ -89,13 +98,24 @@ const getFishingRecommendation = (weatherData: WeatherData['current']) => {
     };
   }
   
+  // Consider air quality in recommendations
+  if (airQuality && airQuality.aqi > 150) {
+    return {
+      status: 'caution',
+      icon: AlertTriangle,
+      message: 'Fish with caution - Poor air quality',
+      details: 'Air quality is unhealthy. Consider shorter fishing trips and avoid strenuous activities.',
+      color: 'warning'
+    };
+  }
+  
   // Moderate conditions
-  if (wind > 15 || visibility < 5 || temp < 5 || temp > 40) {
+  if (wind > 15 || visibility < 5 || temp < 5 || temp > 40 || (airQuality && airQuality.aqi > 100)) {
     return {
       status: 'caution',
       icon: AlertTriangle,
       message: 'Fish with caution',
-      details: 'Moderate winds or visibility issues. Stay close to shore and monitor conditions.',
+      details: 'Moderate winds, visibility issues, or moderate air quality. Stay close to shore and monitor conditions.',
       color: 'warning'
     };
   }
@@ -105,7 +125,7 @@ const getFishingRecommendation = (weatherData: WeatherData['current']) => {
     status: 'good',
     icon: CheckCircle,
     message: 'Good for fishing',
-    details: 'Favorable weather conditions. Good visibility and manageable winds.',
+    details: 'Favorable weather conditions. Good visibility, manageable winds, and clean air.',
     color: 'success'
   };
 };
@@ -167,6 +187,7 @@ export function WeatherCard() {
       const url = "https://api.open-meteo.com/v1/forecast";
       
       try {
+        // Fetch weather data
         const responses = await fetchWeatherApi(url, params);
         const response = responses[0];
         
@@ -181,6 +202,48 @@ export function WeatherCard() {
         const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lon}&localityLanguage=en`);
         const geoData = await geoRes.json();
         const locationName = `${geoData.city}, ${geoData.countryCode}`;
+
+        // Fetch air quality data from Google Air Quality API
+        let airQualityData: AirQualityData | undefined;
+        try {
+          const airQualityResponse = await fetch(
+            `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                location: {
+                  latitude: coords.lat,
+                  longitude: coords.lon,
+                },
+                extraComputations: [
+                  "HEALTH_RECOMMENDATIONS",
+                  "DOMINANT_POLLUTANT"
+                ],
+                languageCode: "en"
+              }),
+            }
+          );
+
+          if (airQualityResponse.ok) {
+            const airData = await airQualityResponse.json();
+            if (airData.indexes && airData.indexes.length > 0) {
+              const universalAqi = airData.indexes.find((index: any) => index.code === "uaqi");
+              if (universalAqi) {
+                airQualityData = {
+                  aqi: universalAqi.aqi,
+                  category: universalAqi.category,
+                  healthRecommendations: airData.healthRecommendations?.generalPopulation || "No specific recommendations",
+                  dominantPollutant: universalAqi.dominantPollutant || "Unknown"
+                };
+              }
+            }
+          }
+        } catch (airError) {
+          console.warn('Air quality data unavailable:', airError);
+        }
 
         setWeatherData({
           current: {
@@ -198,6 +261,7 @@ export function WeatherCard() {
             dewPoint: Math.round(current.variables(9)!.value()),
             isDay,
           },
+          airQuality: airQualityData,
         });
 
       } catch (err) {
@@ -238,8 +302,8 @@ export function WeatherCard() {
       );
     }
     
-    const { current } = weatherData;
-    const fishingRec = getFishingRecommendation(current);
+    const { current, airQuality } = weatherData;
+    const fishingRec = getFishingRecommendation(current, airQuality);
 
     return (
       <>
@@ -311,6 +375,23 @@ export function WeatherCard() {
               <p className="font-semibold">{current.pressure} hPa</p>
             </div>
           </div>
+          {airQuality && (
+            <div className="flex items-center gap-2 text-sm">
+              <Wind className="w-4 h-4 text-accent" />
+              <div>
+                <p className="text-muted-foreground text-xs">Air Quality</p>
+                <p className="font-semibold">
+                  AQI {airQuality.aqi} 
+                  <Badge 
+                    variant={airQuality.aqi <= 50 ? "default" : airQuality.aqi <= 100 ? "secondary" : "destructive"}
+                    className="ml-1 text-xs"
+                  >
+                    {airQuality.category}
+                  </Badge>
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <Separator className="my-4" />
