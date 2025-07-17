@@ -43,6 +43,7 @@ const summarizeFishingLawsPrompt = fishingLawsAI.definePrompt({
   name: 'summarizeFishingLawsPrompt',
   input: {schema: SummarizeFishingLawsInputSchema},
   output: {schema: z.string().nullable()},
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert on Indian fishing laws. Provide a concise summary of the fishing laws for the state of {{state}} based on the following query:
 
 Query: "{{query}}"
