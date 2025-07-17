@@ -1,10 +1,9 @@
 "use client";
 
 import { Header } from "@/components/Header";
-import { PopupChatbot } from "@/components/PopupChatbot";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
-import { MapPin, CloudSun, Shield, Scale, BarChart3 } from "lucide-react";
+import { MapPin, CloudSun, Shield, Scale, BarChart3, MessageCircle } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -37,6 +36,13 @@ export default function Home() {
       icon: Shield,
       href: "/safety",
       color: "from-red-500 to-orange-500"
+    },
+    {
+      title: "AI Assistant",
+      description: "Chat with our intelligent AI assistant for personalized fishing advice and support.",
+      icon: MessageCircle,
+      href: "/chat",
+      color: "from-indigo-500 to-purple-500"
     }
   ];
 
@@ -89,7 +95,7 @@ export default function Home() {
               Explore Our Features
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <Link
                   key={feature.title}
@@ -147,9 +153,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
-        {/* Popup Chatbot */}
-        <PopupChatbot />
       </main>
       
       <footer className="text-center p-8 bg-gradient-to-r from-gray-50 to-gray-100 border-t">

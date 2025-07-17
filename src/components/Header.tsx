@@ -1,4 +1,4 @@
-import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3 } from 'lucide-react';
+import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export function Header() {
     { href: "/map", label: "Map", icon: MapPin },
     { href: "/laws", label: "Laws", icon: Scale },
     { href: "/safety", label: "Safety", icon: Shield },
+    { href: "/chat", label: "AI Chat", icon: MessageCircle },
   ];
 
   return (
