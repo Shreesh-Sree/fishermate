@@ -46,30 +46,20 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Weather & Analytics */}
           <div className="lg:col-span-1 space-y-8">
-            <div className="transform hover:scale-105 transition-all duration-300 ease-out">
-              <WeatherCard />
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300 ease-out">
-              <FishingAnalyticsCard />
-            </div>
+            <WeatherCard />
+            <FishingAnalyticsCard />
           </div>
           
           {/* Center Column - Map (Larger) */}
           <div className="lg:col-span-2">
-            <div className="transform hover:scale-[1.02] transition-all duration-300 ease-out">
-              <GoogleMapCard />
-            </div>
+            <GoogleMapCard />
           </div>
         </div>
 
         {/* Bottom Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 max-w-7xl mx-auto">
-          <div className="transform hover:scale-105 transition-all duration-300 ease-out">
-            <FishingLawsChat />
-          </div>
-          <div className="transform hover:scale-105 transition-all duration-300 ease-out">
-            <SafetyTips />
-          </div>
+          <FishingLawsChat />
+          <SafetyTips />
         </div>
         
         {/* Popup Chatbot */}
