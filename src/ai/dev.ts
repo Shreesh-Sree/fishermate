@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/summarize-fishing-laws.ts';
+import '@/ai/flows/translate-weather-alerts.ts';
+import '@/ai/flows/translate-safety-practices.ts';
