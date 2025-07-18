@@ -6,7 +6,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'FisherMate.AI -',
+  title: 'FisherMate.AI',
   description: 'AI-powered guide for fisherfolk communities in India. Get instant weather updates, fishing analytics, safety guidelines, and legal information.',
   icons: {
     icon: '/favicon.ico',
@@ -27,7 +27,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-sans antialiased transition-colors duration-300">
+      <body className="font-sans antialiased transition-colors duration-300 pt-16">
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

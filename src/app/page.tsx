@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
-      <main className="flex-1 pt-24">
+      <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-20 lg:py-32 px-4 md:px-8 text-center">
           <div className="max-w-6xl mx-auto">
