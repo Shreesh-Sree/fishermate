@@ -1,0 +1,54 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#0284C7;stop-opacity:0.6" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="180" height="180" fill="#F8FAFC" rx="40"/>
+  
+  <!-- Water waves -->
+  <path d="M0 135 C20 130, 40 140, 60 135 C80 130, 100 140, 120 135 C140 130, 160 140, 180 135 L180 180 L0 180 Z" fill="url(#waterGradient)"/>
+  
+  <!-- Additional water detail -->
+  <path d="M0 145 C15 142, 30 148, 45 145 C60 142, 75 148, 90 145 C105 142, 120 148, 135 145 C150 142, 165 148, 180 145 L180 180 L0 180 Z" fill="#0EA5E9" opacity="0.2"/>
+  
+  <!-- Boat hull shadow -->
+  <ellipse cx="90" cy="115" rx="45" ry="8" fill="rgba(0,0,0,0.1)"/>
+  
+  <!-- Boat hull -->
+  <path d="M45 110 L135 110 C135 120, 130 125, 120 125 L60 125 C50 125, 45 120, 45 110 Z" fill="url(#gradient)" stroke="#2563EB" stroke-width="2"/>
+  
+  <!-- Boat details -->
+  <path d="M50 115 L130 115" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  
+  <!-- Mast -->
+  <line x1="90" y1="110" x2="90" y2="30" stroke="url(#gradient)" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Main sail -->
+  <path d="M90 30 L145 65 L90 100 Z" fill="url(#gradient)" opacity="0.9" stroke="#2563EB" stroke-width="1"/>
+  
+  <!-- Main sail details -->
+  <path d="M95 40 L135 65 L95 90" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  
+  <!-- Jib sail -->
+  <path d="M90 45 L55 75 L90 90 Z" fill="url(#gradient)" opacity="0.7" stroke="#2563EB" stroke-width="1"/>
+  
+  <!-- Jib sail details -->
+  <path d="M85 55 L65 75 L85 80" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  
+  <!-- Flag -->
+  <path d="M90 30 L115 40 L90 50 Z" fill="#F59E0B" stroke="#D97706" stroke-width="1"/>
+  
+  <!-- Mast top -->
+  <circle cx="90" cy="30" r="3" fill="#F59E0B"/>
+  
+  <!-- Sun/wind lines -->
+  <path d="M30 50 L40 50 M160 40 L170 40 M25 70 L35 70 M165 60 L175 60" stroke="#FBB040" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

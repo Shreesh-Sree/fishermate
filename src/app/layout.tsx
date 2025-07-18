@@ -6,8 +6,13 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'FisherMate.AI',
-  description: 'AI-powered guide for fisherfolk communities in India.',
+  title: 'FisherMate.AI - Your AI Guide on the High Seas',
+  description: 'AI-powered guide for fisherfolk communities in India. Get instant weather updates, fishing analytics, safety guidelines, and legal information.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
