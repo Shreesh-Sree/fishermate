@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { handleChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Message = {
   role: "user" | "model";
@@ -24,9 +25,11 @@ const chatSchema = z.object({
 });
 
 export function Chatbot() {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof chatSchema>>({
     resolver: zodResolver(chatSchema),
@@ -36,12 +39,7 @@ export function Chatbot() {
   });
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   async function onSubmit(values: z.infer<typeof chatSchema>) {
@@ -76,9 +74,9 @@ export function Chatbot() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-          AI Assistant
+          {t("chat")}
         </CardTitle>
-        <CardDescription>Ask me anything about fishing!</CardDescription>
+        <CardDescription>{t("ask_anything")}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-0 min-h-0">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
@@ -104,7 +102,7 @@ export function Chatbot() {
                 )}
                 <div
                   className={cn(
-                    "p-3 rounded-lg max-w-xs",
+                    "p-3 rounded-lg max-w-[85%] break-words",
                     message.role === "user"
                       ? "glass-button-primary text-white"
                       : "glass-card-sm"
@@ -129,6 +127,7 @@ export function Chatbot() {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
         <div className="p-4 border-t border-border/50">
@@ -141,10 +140,17 @@ export function Chatbot() {
                   <FormItem className="flex-1">
                     <FormControl>
                       <Input
-                        placeholder="Ask me anything about fishing..."
+                        placeholder={t("ask_anything")}
                         autoComplete="off"
                         disabled={isLoading}
                         className="glass-input"
+                        aria-label="Chat message input"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            form.handleSubmit(onSubmit)();
+                          }
+                        }}
                         {...field}
                       />
                     </FormControl>
@@ -152,13 +158,19 @@ export function Chatbot() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="icon" disabled={isLoading} className="glass-button-primary">
+              <Button 
+                type="submit" 
+                size="icon" 
+                disabled={isLoading} 
+                className="glass-button-primary"
+                aria-label={isLoading ? t("loading") : t("send_message")}
+              >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
-                <span className="sr-only">Send message</span>
+                <span className="sr-only">{t("send_message")}</span>
               </Button>
             </form>
           </Form>

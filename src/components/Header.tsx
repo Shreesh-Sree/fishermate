@@ -18,11 +18,11 @@ export function Header() {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-    { href: "/map", label: "Map", icon: MapPin },
-    { href: "/laws", label: "Laws", icon: Scale },
-    { href: "/safety", label: "Safety", icon: Shield },
-    { href: "/chat", label: "AI Chat", icon: MessageCircle },
+    { href: "/dashboard", label: t("dashboard"), icon: BarChart3 },
+    { href: "/map", label: t("map"), icon: MapPin },
+    { href: "/laws", label: t("laws"), icon: Scale },
+    { href: "/safety", label: t("safety"), icon: Shield },
+    { href: "/chat", label: t("chat"), icon: MessageCircle },
   ];
 
   return (
@@ -54,7 +54,7 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="glass-button">
+                <Button variant="ghost" size="icon" className="glass-button" aria-label="User menu">
                   <User className="h-[1.2rem] w-[1.2rem]" />
                   <span className="sr-only">User Menu</span>
                 </Button>
@@ -67,7 +67,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -75,7 +75,7 @@ export function Header() {
             <Link href="/login">
               <Button variant="ghost" size="sm" className="glass-button">
                 <LogIn className="mr-2 h-4 w-4" />
-                Sign In
+                {t("sign_in")}
               </Button>
             </Link>
           )}
@@ -84,7 +84,7 @@ export function Header() {
           <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="glass-button">
+                <Button variant="ghost" size="icon" className="glass-button" aria-label="Navigation menu">
                   <Settings className="h-[1.2rem] w-[1.2rem]" />
                   <span className="sr-only">Navigation Menu</span>
                 </Button>
@@ -104,7 +104,7 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="glass-button">
+              <Button variant="ghost" size="icon" className="glass-button" aria-label="Select language">
                 <Languages className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Select language</span>
               </Button>
@@ -121,7 +121,7 @@ export function Header() {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="glass-button">
+              <Button variant="ghost" size="icon" className="glass-button" aria-label="Settings and help">
                 <Info className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Settings and Help</span>
               </Button>
@@ -129,15 +129,15 @@ export function Header() {
             <DropdownMenuContent align="end" className="glass-card">
               <DropdownMenuItem>
                 <Info className="mr-2 h-4 w-4" />
-                About FisherMate.AI
+                {t("about_app")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <HelpCircle className="mr-2 h-4 w-4" />
-                Help & Support
+                {t("help_support")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <span className="text-sm text-muted-foreground">Version 1.0.0</span>
+                <span className="text-sm text-muted-foreground">{t("version")} 1.0.0</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -147,6 +147,7 @@ export function Header() {
             size="icon"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             className="glass-button"
+            aria-label="Toggle theme"
           >
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

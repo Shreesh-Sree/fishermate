@@ -3,8 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sun, Moon, Fish, Waves, Wind, Compass, TrendingUp, TrendingDown, Clock, Calendar, Activity } from 'lucide-react';
+import { Sun, Moon, Fish, Waves, Wind, Compass, TrendingUp, TrendingDown, Clock, Calendar, Activity, Thermometer, Eye, Gauge } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface FishingAnalytics {
   solarData: {
@@ -13,12 +14,18 @@ interface FishingAnalytics {
     solarNoon: string;
     dayLength: string;
     uvIndex: number;
+    goldenHour: {
+      morning: { start: string; end: string };
+      evening: { start: string; end: string };
+    };
   };
   tideData: {
     highTide: string;
     lowTide: string;
     currentTide: 'rising' | 'falling';
     tideHeight: number;
+    nextTideChange: string;
+    tideStrength: 'weak' | 'moderate' | 'strong';
   };
   fishingScore: {
     overall: number;
@@ -27,6 +34,7 @@ interface FishingAnalytics {
       tides: number;
       moonPhase: number;
       time: number;
+      barometric: number;
     };
   };
   recommendations: string[];
@@ -34,10 +42,29 @@ interface FishingAnalytics {
     phase: string;
     illumination: number;
     icon: string;
+    fishingImpact: 'excellent' | 'good' | 'fair' | 'poor';
   };
+  bestFishingTimes: {
+    morning: { start: string; end: string; quality: 'excellent' | 'good' | 'fair' };
+    evening: { start: string; end: string; quality: 'excellent' | 'good' | 'fair' };
+  };
+  fishingConditions: {
+    waterTemperature: number;
+    visibility: string;
+    windCondition: 'ideal' | 'good' | 'challenging' | 'dangerous';
+    barometricPressure: number;
+    pressureTrend: 'rising' | 'falling' | 'stable';
+  };
+  targetSpecies: {
+    name: string;
+    probability: number;
+    bestTime: string;
+    suggestedBait: string[];
+  }[];
 }
 
 const FishingAnalyticsCard = () => {
+  const { t } = useLanguage();
   const [analytics, setAnalytics] = useState<FishingAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,10 +123,19 @@ const FishingAnalyticsCard = () => {
       const moonScore = calculateMoonScore(moonData.illumination);
       const timeScore = calculateTimeScore(hour, sunrise, sunset);
       
-      const overallScore = Math.round((weatherScore + tideScore + moonScore + timeScore) / 4);
+      const overallScore = Math.round((weatherScore + tideScore + moonScore + timeScore + barometricScore) / 5);
 
       // Generate tide times
-      const { highTide, lowTide, currentTide } = calculateTideTimes(hour);
+      const { highTide, lowTide, currentTide, nextTideChange, tideStrength } = calculateTideTimes(hour);
+
+      // Calculate best fishing times
+      const bestTimes = calculateBestFishingTimes(sunrise, sunset, hour);
+
+      // Generate target species based on conditions
+      const targetSpecies = generateTargetSpecies(overallScore, moonData, hour);
+
+      // Calculate fishing conditions
+      const fishingConditions = calculateFishingConditions(hour, userLocation);
 
       const fishingAnalytics: FishingAnalytics = {
         solarData: {
@@ -107,13 +143,25 @@ const FishingAnalyticsCard = () => {
           sunset: formatTime(sunset),
           solarNoon: formatTime(new Date(now.setHours(12, 0, 0))),
           dayLength: calculateDayLength(sunrise, sunset),
-          uvIndex: calculateUVIndex(hour, userLocation.lat)
+          uvIndex: calculateUVIndex(hour, userLocation.lat),
+          goldenHour: {
+            morning: {
+              start: formatTime(new Date(sunrise.getTime() - 30 * 60000)),
+              end: formatTime(new Date(sunrise.getTime() + 60 * 60000))
+            },
+            evening: {
+              start: formatTime(new Date(sunset.getTime() - 60 * 60000)),
+              end: formatTime(new Date(sunset.getTime() + 30 * 60000))
+            }
+          }
         },
         tideData: {
           highTide,
           lowTide,
           currentTide,
-          tideHeight: 1.2 + Math.random() * 0.8
+          tideHeight: 1.2 + Math.random() * 0.8,
+          nextTideChange,
+          tideStrength
         },
         fishingScore: {
           overall: overallScore,
@@ -121,11 +169,18 @@ const FishingAnalyticsCard = () => {
             weather: weatherScore,
             tides: tideScore,
             moonPhase: moonScore,
-            time: timeScore
+            time: timeScore,
+            barometric: barometricScore
           }
         },
-        moonPhase: moonData,
-        recommendations: generateRecommendations(overallScore, hour, moonData)
+        moonPhase: {
+          ...moonData,
+          fishingImpact: getMoonFishingImpact(moonData.illumination)
+        },
+        bestFishingTimes: bestTimes,
+        fishingConditions,
+        targetSpecies,
+        recommendations: generateEnhancedRecommendations(overallScore, hour, moonData, fishingConditions)
       };
 
       setAnalytics(fishingAnalytics);
@@ -220,6 +275,84 @@ const FishingAnalyticsCard = () => {
       return 85 + Math.round(Math.random() * 10);
     }
     return 60 + Math.round(Math.random() * 20);
+  };
+
+  const calculateBarometricScore = (hour: number): number => {
+    // Simulate barometric pressure effects
+    return 65 + Math.round(Math.random() * 25);
+  };
+
+  const calculateBestFishingTimes = (sunrise: Date, sunset: Date, currentHour: number) => {
+    return {
+      morning: {
+        start: formatTime(new Date(sunrise.getTime() - 30 * 60000)),
+        end: formatTime(new Date(sunrise.getTime() + 90 * 60000)),
+        quality: (currentHour >= 5 && currentHour <= 8) ? 'excellent' : 'good' as 'excellent' | 'good' | 'fair'
+      },
+      evening: {
+        start: formatTime(new Date(sunset.getTime() - 90 * 60000)),
+        end: formatTime(new Date(sunset.getTime() + 30 * 60000)),
+        quality: (currentHour >= 17 && currentHour <= 20) ? 'excellent' : 'good' as 'excellent' | 'good' | 'fair'
+      }
+    };
+  };
+
+  const generateTargetSpecies = (score: number, moonData: any, hour: number) => {
+    const species = [
+      { name: t("snapper"), probability: score > 70 ? 85 : 60, bestTime: hour < 12 ? t("morning") : t("evening"), suggestedBait: [t("live_shrimp"), t("squid")] },
+      { name: t("mackerel"), probability: score > 60 ? 75 : 55, bestTime: t("morning"), suggestedBait: [t("small_fish"), t("artificial_lures")] },
+      { name: t("sardine"), probability: 70, bestTime: t("morning"), suggestedBait: [t("worms"), t("small_fish")] },
+      { name: t("kingfish"), probability: score > 80 ? 90 : 65, bestTime: t("evening"), suggestedBait: [t("live_shrimp"), t("squid")] },
+    ];
+    return species.sort((a, b) => b.probability - a.probability).slice(0, 3);
+  };
+
+  const calculateFishingConditions = (hour: number, location: any) => {
+    return {
+      waterTemperature: 26 + Math.round(Math.random() * 4),
+      visibility: hour >= 6 && hour <= 18 ? t("good") : t("fair"),
+      windCondition: hour >= 5 && hour <= 19 ? 'ideal' : 'good' as 'ideal' | 'good' | 'challenging' | 'dangerous',
+      barometricPressure: 1013 + Math.round(Math.random() * 20 - 10),
+      pressureTrend: ['rising', 'falling', 'stable'][Math.floor(Math.random() * 3)] as 'rising' | 'falling' | 'stable'
+    };
+  };
+
+  const getMoonFishingImpact = (illumination: number): 'excellent' | 'good' | 'fair' | 'poor' => {
+    if (illumination < 25 || illumination > 75) return 'excellent';
+    if (illumination < 40 || illumination > 60) return 'good';
+    return 'fair';
+  };
+
+  const generateEnhancedRecommendations = (score: number, hour: number, moonData: any, conditions: any) => {
+    const recommendations = [];
+    
+    if (score >= 80) {
+      recommendations.push(t("weather_excellent"));
+    } else if (score >= 60) {
+      recommendations.push(t("weather_good"));
+    } else if (score >= 40) {
+      recommendations.push(t("weather_fair"));
+    } else {
+      recommendations.push(t("weather_poor"));
+    }
+
+    if (hour >= 5 && hour <= 8) {
+      recommendations.push("Early morning is ideal for active fish feeding.");
+    }
+    
+    if (hour >= 17 && hour <= 20) {
+      recommendations.push("Evening hours show high fish activity.");
+    }
+
+    if (moonData.illumination < 25) {
+      recommendations.push("New moon phase increases fish feeding activity.");
+    }
+
+    if (conditions.pressureTrend === 'falling') {
+      recommendations.push("Falling barometric pressure often triggers fish feeding.");
+    }
+
+    return recommendations;
   };
 
   const calculateTimeScore = (hour: number, sunrise: Date, sunset: Date): number => {

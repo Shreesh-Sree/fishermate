@@ -97,6 +97,24 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
+.glass-button-primary {
+  @apply backdrop-blur-md bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 font-medium;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-button-outline {
+  @apply backdrop-blur-md bg-white/40 dark:bg-gray-800/40 border border-gray-300/60 dark:border-gray-600/60 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all duration-200;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-input {
+  @apply backdrop-blur-md bg-white/50 dark:bg-gray-900/50 border border-gray-200/60 dark:border-gray-700/60 focus:border-blue-500/80 dark:focus:border-blue-400/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200 placeholder:text-gray-500 dark:placeholder:text-gray-400;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 /* Professional Card Components */
 .modern-card {
   @apply glass-card p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5;
