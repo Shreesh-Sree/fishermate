@@ -6,7 +6,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'FisherMate.AI - Your AI Guide on the High Seas',
+  title: 'FisherMate.AI -',
   description: 'AI-powered guide for fisherfolk communities in India. Get instant weather updates, fishing analytics, safety guidelines, and legal information.',
   icons: {
     icon: '/favicon.ico',
