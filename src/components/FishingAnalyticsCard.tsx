@@ -122,6 +122,7 @@ const FishingAnalyticsCard = () => {
       const tideScore = calculateTideScore(hour);
       const moonScore = calculateMoonScore(moonData.illumination);
       const timeScore = calculateTimeScore(hour, sunrise, sunset);
+      const barometricScore = calculateBarometricScore(hour);
       
       const overallScore = Math.round((weatherScore + tideScore + moonScore + timeScore + barometricScore) / 5);
 
@@ -377,11 +378,18 @@ const FishingAnalyticsCard = () => {
     // Simplified tide calculation
     const highHour = (currentHour < 12) ? Math.floor(Math.random() * 4) + 8 : Math.floor(Math.random() * 4) + 20;
     const lowHour = (highHour + 6) % 24;
+    const nextChangeHour = (currentHour < highHour) ? highHour : lowHour;
+    
+    // Calculate tide strength based on moon phase
+    const tideStrengths: ('weak' | 'moderate' | 'strong')[] = ['weak', 'moderate', 'strong'];
+    const tideStrength = tideStrengths[Math.floor(Math.random() * 3)];
     
     return {
-      highTide: `${highHour}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} ${highHour < 12 ? 'AM' : 'PM'}`,
+      highTide: `${highHour > 12 ? highHour - 12 : highHour}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} ${highHour < 12 ? 'AM' : 'PM'}`,
       lowTide: `${lowHour > 12 ? lowHour - 12 : lowHour}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} ${lowHour < 12 ? 'AM' : 'PM'}`,
-      currentTide: Math.random() > 0.5 ? 'rising' : 'falling' as 'rising' | 'falling'
+      currentTide: Math.random() > 0.5 ? 'rising' : 'falling' as 'rising' | 'falling',
+      nextTideChange: `${nextChangeHour > 12 ? nextChangeHour - 12 : nextChangeHour}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} ${nextChangeHour < 12 ? 'AM' : 'PM'}`,
+      tideStrength
     };
   };
 
@@ -479,7 +487,7 @@ const FishingAnalyticsCard = () => {
       );
     }
 
-    const { fishingScore, recommendations, solarData, tideData, moonPhase } = analytics;
+    const { fishingScore, recommendations, solarData, tideData, moonPhase, bestFishingTimes, fishingConditions, targetSpecies } = analytics;
     const scoreColor = fishingScore.overall >= 80 ? 'text-green-500' : fishingScore.overall >= 60 ? 'text-yellow-500' : 'text-red-500';
 
     return (
@@ -496,22 +504,74 @@ const FishingAnalyticsCard = () => {
             ></div>
             <div className="relative z-10 bg-white dark:bg-gray-800 w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-md">
               <p className={`text-4xl font-bold ${scoreColor}`}>{fishingScore.overall}</p>
-              <p className="text-xs text-gray-500">Fishing Score</p>
+              <p className="text-xs text-gray-500">{t("fishing_score")}</p>
             </div>
           </div>
         </div>
 
-        {/* Recommendations */}
+        {/* Best Fishing Times */}
+        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-700">
+          <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            {t("best_fishing_times")}
+          </h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <p className="font-medium text-blue-700">{t("morning")}</p>
+              <p className="text-blue-600">{bestFishingTimes.morning.start} - {bestFishingTimes.morning.end}</p>
+              <Badge variant="outline" className="text-xs">{t(bestFishingTimes.morning.quality)}</Badge>
+            </div>
+            <div>
+              <p className="font-medium text-blue-700">{t("evening")}</p>
+              <p className="text-blue-600">{bestFishingTimes.evening.start} - {bestFishingTimes.evening.end}</p>
+              <Badge variant="outline" className="text-xs">{t(bestFishingTimes.evening.quality)}</Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Target Species */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg border border-green-100 dark:border-green-700">
-          <h4 className="text-sm font-bold text-green-800 mb-2">Top Recommendations</h4>
-          <ul className="space-y-1 text-xs text-green-700">
-            {recommendations.slice(0, 2).map((rec, i) => (
-              <li key={i} className="flex items-center gap-2">
-                <Fish className="w-3 h-3 flex-shrink-0" />
-                <span>{rec}</span>
-              </li>
+          <h4 className="text-sm font-bold text-green-800 mb-2 flex items-center gap-2">
+            <Fish className="w-4 h-4" />
+            {t("target_species")}
+          </h4>
+          <div className="space-y-2">
+            {targetSpecies.map((species, index) => (
+              <div key={index} className="flex justify-between items-center text-xs">
+                <div>
+                  <p className="font-medium text-green-700">{species.name}</p>
+                  <p className="text-green-600">{species.bestTime} • {species.suggestedBait.join(', ')}</p>
+                </div>
+                <Badge variant="secondary" className="text-xs">{species.probability}%</Badge>
+              </div>
             ))}
-          </ul>
+          </div>
+        </div>
+
+        {/* Fishing Conditions */}
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-700">
+          <h4 className="text-sm font-bold text-purple-800 mb-2 flex items-center gap-2">
+            <Gauge className="w-4 h-4" />
+            Conditions
+          </h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <Thermometer className="w-3 h-3 text-purple-600" />
+              <span className="text-purple-700">{fishingConditions.waterTemperature}°C</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Eye className="w-3 h-3 text-purple-600" />
+              <span className="text-purple-700">{fishingConditions.visibility}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Wind className="w-3 h-3 text-purple-600" />
+              <span className="text-purple-700">{t(fishingConditions.windCondition)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Gauge className="w-3 h-3 text-purple-600" />
+              <span className="text-purple-700">{fishingConditions.barometricPressure} hPa</span>
+            </div>
+          </div>
         </div>
 
         {/* Key Metrics Grid */}
@@ -519,21 +579,34 @@ const FishingAnalyticsCard = () => {
           {/* Solar */}
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-2 rounded-lg border border-yellow-100 dark:border-yellow-700">
             <Sun className="w-5 h-5 mx-auto text-yellow-600 mb-1" />
-            <p className="text-xs font-medium text-yellow-800">Sunrise</p>
+            <p className="text-xs font-medium text-yellow-800">{t("sunrise")}</p>
             <p className="text-sm font-bold text-yellow-900">{solarData.sunrise}</p>
           </div>
           {/* Tides */}
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-700">
             <Waves className="w-5 h-5 mx-auto text-blue-600 mb-1" />
-            <p className="text-xs font-medium text-blue-800">High Tide</p>
+            <p className="text-xs font-medium text-blue-800">{t("high_tide")}</p>
             <p className="text-sm font-bold text-blue-900">{tideData.highTide}</p>
           </div>
           {/* Moon */}
           <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-2 rounded-lg border border-indigo-100 dark:border-indigo-700">
             <Moon className="w-5 h-5 mx-auto text-indigo-600 mb-1" />
-            <p className="text-xs font-medium text-indigo-800">Moon</p>
+            <p className="text-xs font-medium text-indigo-800">{t("moon_phase")}</p>
             <p className="text-sm font-bold text-indigo-900">{moonPhase.phase}</p>
           </div>
+        </div>
+
+        {/* Recommendations */}
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-3 rounded-lg border border-orange-100 dark:border-orange-700">
+          <h4 className="text-sm font-bold text-orange-800 mb-2">Recommendations</h4>
+          <ul className="space-y-1 text-xs text-orange-700">
+            {recommendations.slice(0, 3).map((rec, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <Compass className="w-3 h-3 flex-shrink-0" />
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     );
@@ -545,7 +618,7 @@ const FishingAnalyticsCard = () => {
         <div className="flex items-center gap-3">
           <Activity className="w-6 h-6 text-white animate-float" />
           <div>
-            <h3 className="text-lg font-bold animate-shimmer">Fishing Analytics</h3>
+            <h3 className="text-lg font-bold animate-shimmer">{t("fishing_analytics_title")}</h3>
             <p className="text-green-100 text-sm">Your AI-powered fishing forecast</p>
           </div>
         </div>
