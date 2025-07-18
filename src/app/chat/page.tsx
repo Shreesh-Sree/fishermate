@@ -9,7 +9,7 @@ export default function ChatPage() {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-background gradient-bg">
         <Header />
-        <main className="flex-1 container mx-auto p-2 sm:p-4 md:p-8">
+        <main className="flex-1 container mx-auto p-2 sm:p-4 md:p-8 pt-20 sm:pt-24">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-4 sm:mb-6 md:mb-8">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gradient mb-2 sm:mb-4">

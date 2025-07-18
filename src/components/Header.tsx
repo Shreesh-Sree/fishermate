@@ -1,7 +1,9 @@
-import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle, LogIn, LogOut, User, Menu, X, Ship } from 'lucide-react';
+import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle, LogIn, LogOut, User, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,7 +50,7 @@ export function Header() {
           aria-label={t("home")}
         >
           <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/20 backdrop-blur-sm group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all duration-300">
-            <Ship className="w-6 h-6 text-blue-400" />
+            <Image src="/favicon.ico" alt="FisherMate" width={24} height={24} className="w-6 h-6" />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             FisherMate.AI
@@ -153,7 +155,7 @@ export function Header() {
               <div className="flex items-center justify-between p-4 border-b border-white/20">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/20 backdrop-blur-sm">
-                    <Ship className="w-5 h-5 text-blue-400" />
+                    <Image src="/favicon.ico" alt="FisherMate" width={20} height={20} className="w-5 h-5" />
                   </div>
                   <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     FisherMate.AI

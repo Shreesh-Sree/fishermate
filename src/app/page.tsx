@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background gradient-bg">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pt-16">
         {/* Hero Section */}
         <section className="relative py-20 lg:py-32 px-4 md:px-8 text-center">
           <div className="max-w-6xl mx-auto">
@@ -163,8 +163,8 @@ export default function Home() {
       
       <footer className="text-center p-8 bg-muted/20 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} FisherMate.AI. All rights reserved.</p>
-          <p className="text-muted-foreground text-xs mt-2">Powered by Google Maps Platform & Advanced AI</p>
+          <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} FisherMate.AI - Made with ❤️ by QuarkVerse. All rights reserved.</p>
+          <p className="text-muted-foreground text-xs mt-2">Powered by Google Maps Platform & Google Gemini</p>
         </div>
       </footer>
     </div>

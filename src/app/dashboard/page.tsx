@@ -11,7 +11,7 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-background gradient-bg">
         <Header />
-        <main className="flex-1 container mx-auto p-2 sm:p-4 md:p-8">
+        <main className="flex-1 container mx-auto p-2 sm:p-4 md:p-8 pt-20 sm:pt-24">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-7xl mx-auto">
             <ErrorBoundary>
               <WeatherCard />
