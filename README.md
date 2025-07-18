@@ -18,6 +18,11 @@ FisherMate.AI is a comprehensive web application designed specifically for fishe
 ### 🎯 Mission
 Empowering coastal fishing communities with intelligent technology to make informed decisions, stay safe, and operate within legal frameworks while maximizing their fishing success.
 
+### 🎥 Demo Video
+[![FisherMate.AI Demo](https://img.youtube.com/vi/n6QxwPZPMxM/maxresdefault.jpg)](https://youtu.be/n6QxwPZPMxM)
+
+**[🎬 Watch Full Demo on YouTube](https://youtu.be/n6QxwPZPMxM)** - See FisherMate.AI in action with all features demonstrated!
+
 ---
 
 ## ✨ Key Features
@@ -246,7 +251,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Documentation**: [Wiki Pages](https://github.com/Shreesh-Sree/fishermate/wiki)
 - **Issues**: [GitHub Issues](https://github.com/Shreesh-Sree/fishermate/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Shreesh-Sree/fishermate/discussions)
-- **Email**: team.quarkverse@gmail.com
+- **Email**: support@fishermate.ai
 
 ---
 
