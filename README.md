@@ -246,7 +246,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Documentation**: [Wiki Pages](https://github.com/Shreesh-Sree/fishermate/wiki)
 - **Issues**: [GitHub Issues](https://github.com/Shreesh-Sree/fishermate/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Shreesh-Sree/fishermate/discussions)
-- **Email**: support@fishermate.ai
+- **Email**: team.quarkverse@gmail.com
 
 ---
 
