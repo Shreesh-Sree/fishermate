@@ -54,6 +54,7 @@ export function FishingLawsChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("");
   const [currentTab, setCurrentTab] = useState("questions");
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -97,6 +98,30 @@ export function FishingLawsChat() {
   const handleQuestionSelect = (question: string) => {
     setSelectedQuestion(question);
     form.setValue("query", question);
+  };
+
+  const handleStateSelect = (state: string) => {
+    setSelectedState(state);
+    form.setValue("state", state);
+  };
+
+  const handleQuickSubmit = () => {
+    if (!selectedState || !selectedQuestion) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please select a state and a question.",
+      });
+      return;
+    }
+
+    form.setValue("state", selectedState);
+    form.setValue("query", selectedQuestion);
+    
+    onSubmit({
+      state: selectedState,
+      query: selectedQuestion
+    });
   };
 
   const togglePlay = () => {
@@ -248,33 +273,24 @@ export function FishingLawsChat() {
 
             <TabsContent value="questions" className="space-y-4 mt-6">
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium flex items-center gap-2">
-                        <Languages className="w-4 h-4" />
-                        {t('state_label')}
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="glass-input">
-                            <SelectValue placeholder={t('select_state_placeholder')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="glass-effect border-white/20 max-h-[200px]">
-                          {indianStates.map((state) => (
-                            <SelectItem key={state} value={state} className="hover:bg-white/10">
-                              {state}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Languages className="w-4 h-4" />
+                    {t('state_label')}
+                  </label>
+                  <Select onValueChange={handleStateSelect} value={selectedState}>
+                    <SelectTrigger className="glass-input">
+                      <SelectValue placeholder={t('select_state_placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent className="glass-effect border-white/20 max-h-[200px]">
+                      {indianStates.map((state) => (
+                        <SelectItem key={state} value={state} className="hover:bg-white/10">
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -289,16 +305,31 @@ export function FishingLawsChat() {
                         key={index}
                         variant={selectedQuestion === question ? "default" : "secondary"}
                         className="cursor-pointer glass-button-outline text-xs p-3 h-auto text-left justify-start hover:bg-blue-500/20 transition-colors"
-                        onClick={() => {
-                          handleQuestionSelect(question);
-                          setCurrentTab("custom");
-                        }}
+                        onClick={() => handleQuestionSelect(question)}
                       >
                         {question}
                       </Badge>
                     ))}
                   </div>
                 </div>
+
+                <Button 
+                  onClick={handleQuickSubmit}
+                  disabled={isLoading || !selectedState || !selectedQuestion} 
+                  className="glass-button-primary w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('fetching_summary')}
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      {t('get_summary_button')}
+                    </>
+                  )}
+                </Button>
               </div>
             </TabsContent>
 

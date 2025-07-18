@@ -35,7 +35,7 @@ const GoogleMapCard = () => {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Load Google Maps API with better error handling
+  // Load Google Maps API with better error handling and async loading
   const loadGoogleMaps = () => {
     if (window.google && window.google.maps) {
       setIsGoogleMapsLoaded(true);
@@ -50,7 +50,7 @@ const GoogleMapCard = () => {
     }
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&loading=async&callback=initMap`;
     script.async = true;
     script.defer = true;
     
@@ -177,26 +177,213 @@ const GoogleMapCard = () => {
 
     googleMapRef.current = map;
 
-    // Add user location marker with animation
-    const userMarker = new google.maps.Marker({
-      position: userLocation,
-      map: map,
-      title: 'Your Location',
-      icon: {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="24" r="16" fill="#1D4ED8" stroke="#FFFFFF" stroke-width="3"/>
-            <circle cx="24" cy="24" r="8" fill="#FFFFFF"/>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(48, 48),
-      },
-      animation: google.maps.Animation.DROP,
-    });
+    // Add user location marker with modern AdvancedMarkerElement
+    if (google.maps.marker && google.maps.marker.AdvancedMarkerElement) {
+      // Use modern AdvancedMarkerElement
+      const userMarkerElement = document.createElement('div');
+      userMarkerElement.innerHTML = `
+        <div style="
+          width: 48px; 
+          height: 48px; 
+          background: #1D4ED8; 
+          border: 3px solid #FFFFFF; 
+          border-radius: 50%; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        ">
+          <div style="
+            width: 16px; 
+            height: 16px; 
+            background: #FFFFFF; 
+            border-radius: 50%;
+          "></div>
+        </div>
+      `;
 
-    // Search for nearby fishing-related places using Places API
-    const service = new google.maps.places.PlacesService(map);
-    searchNearbyFishingPlaces(service, userLocation, map);
+      const userMarker = new google.maps.marker.AdvancedMarkerElement({
+        position: userLocation,
+        map: map,
+        title: 'Your Location',
+        content: userMarkerElement,
+      });
+    } else {
+      // Fallback to legacy Marker for backward compatibility
+      const userMarker = new google.maps.Marker({
+        position: userLocation,
+        map: map,
+        title: 'Your Location',
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="16" fill="#1D4ED8" stroke="#FFFFFF" stroke-width="3"/>
+              <circle cx="24" cy="24" r="8" fill="#FFFFFF"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(48, 48),
+        },
+        animation: google.maps.Animation.DROP,
+      });
+    }
+
+    // Search for nearby fishing-related places using modern Places API
+    if (google.maps.places && google.maps.places.Place) {
+      searchNearbyFishingPlacesModern(userLocation, map);
+    } else {
+      // Fallback to legacy PlacesService
+      const service = new google.maps.places.PlacesService(map);
+      searchNearbyFishingPlaces(service, userLocation, map);
+    }
+  };
+
+  // Modern Places API search function
+  const searchNearbyFishingPlacesModern = async (location: UserLocation, map: google.maps.Map) => {
+    const searches = [
+      { keywords: ['fishing', 'marina', 'harbor'], type: 'marina' },
+      { keywords: ['fishing', 'pier', 'jetty'], type: 'fishing_spot' },
+      { keywords: ['bait', 'tackle', 'fishing', 'shop'], type: 'bait_shop' },
+      { keywords: ['coast guard', 'marine safety'], type: 'safety_station' },
+      { keywords: ['seafood', 'restaurant'], type: 'restaurant' }
+    ];
+
+    const allPOIs: FishingPOI[] = [];
+
+    try {
+      for (const [index, search] of searches.entries()) {
+        const request = {
+          textQuery: search.keywords.join(' '),
+          fields: ['displayName', 'location', 'rating', 'priceLevel', 'photos'],
+          locationBias: {
+            radius: 25000,
+            center: location
+          },
+          maxResultCount: 3
+        };
+
+        // Note: This is a simplified implementation as the new Places API requires different setup
+        // For now, we'll fall back to the legacy implementation
+        const service = new google.maps.places.PlacesService(map);
+        const legacyRequest = {
+          location: new google.maps.LatLng(location.lat, location.lng),
+          radius: 25000,
+          keyword: search.keywords.join(' '),
+        };
+
+        service.nearbySearch(legacyRequest, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            results.slice(0, 3).forEach((place, placeIndex) => {
+              if (place.geometry && place.geometry.location) {
+                const poi: FishingPOI = {
+                  id: index * 10 + placeIndex,
+                  name: place.name || 'Unknown Location',
+                  type: search.type as any,
+                  lat: place.geometry.location.lat(),
+                  lng: place.geometry.location.lng(),
+                  distance: calculateDistance(location, {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                  }),
+                  description: place.vicinity || 'No description available',
+                  rating: place.rating,
+                  place_id: place.place_id,
+                  price_level: place.price_level,
+                  photos: place.photos?.slice(0, 1).map(photo => 
+                    photo.getUrl({ maxWidth: 300, maxHeight: 200 })
+                  )
+                };
+
+                allPOIs.push(poi);
+                addModernMarker(poi, map);
+              }
+            });
+
+            if (index === searches.length - 1) {
+              setFishingPOIs(allPOIs.sort((a, b) => a.distance - b.distance));
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error with modern Places API:', error);
+      // Fallback to legacy implementation
+      const service = new google.maps.places.PlacesService(map);
+      searchNearbyFishingPlaces(service, location, map);
+    }
+  };
+
+  // Add marker using modern AdvancedMarkerElement or fallback to legacy
+  const addModernMarker = (poi: FishingPOI, map: google.maps.Map) => {
+    if (google.maps.marker && google.maps.marker.AdvancedMarkerElement) {
+      const markerElement = document.createElement('div');
+      markerElement.innerHTML = getMarkerHTML(poi.type);
+
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: poi.lat, lng: poi.lng },
+        map: map,
+        title: poi.name,
+        content: markerElement,
+      });
+
+      // Add click listener for info window
+      markerElement.addEventListener('click', () => {
+        const infoWindow = new google.maps.InfoWindow({
+          content: createInfoWindowContent(poi)
+        });
+        infoWindow.open(map, marker);
+      });
+    } else {
+      // Fallback to legacy marker
+      const marker = new google.maps.Marker({
+        position: { lat: poi.lat, lng: poi.lng },
+        map: map,
+        title: poi.name,
+        icon: getMarkerIcon(poi.type)
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: createInfoWindowContent(poi)
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+      });
+    }
+  };
+
+  // Get HTML for modern markers
+  const getMarkerHTML = (type: string): string => {
+    const colors = {
+      marina: '#3B82F6',
+      fishing_spot: '#10B981',
+      bait_shop: '#F59E0B',
+      safety_station: '#EF4444',
+      restaurant: '#8B5CF6'
+    };
+
+    const icons = {
+      marina: '⚓',
+      fishing_spot: '🐟',
+      bait_shop: '🎣',
+      safety_station: '🛡️',
+      restaurant: '🍽️'
+    };
+
+    return `
+      <div style="
+        width: 40px;
+        height: 40px;
+        background: ${colors[type as keyof typeof colors] || '#6B7280'};
+        border: 2px solid #FFFFFF;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        cursor: pointer;
+      ">${icons[type as keyof typeof icons] || '📍'}</div>
+    `;
   };
 
   const searchNearbyFishingPlaces = (service: google.maps.places.PlacesService, location: UserLocation, map: google.maps.Map) => {
@@ -246,22 +433,8 @@ const GoogleMapCard = () => {
 
               allPOIs.push(poi);
 
-              // Add marker to map
-              const marker = new google.maps.Marker({
-                position: { lat: poi.lat, lng: poi.lng },
-                map: map,
-                title: poi.name,
-                icon: getMarkerIcon(poi.type)
-              });
-
-              // Add info window
-              const infoWindow = new google.maps.InfoWindow({
-                content: createInfoWindowContent(poi)
-              });
-
-              marker.addListener('click', () => {
-                infoWindow.open(map, marker);
-              });
+              // Add marker to map using modern API when available
+              addModernMarker(poi, map);
             }
           });
         }
