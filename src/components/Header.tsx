@@ -24,7 +24,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { PWAInstallIcon } from '@/components/PWAInstallIcon';
 import { EmergencySOSButton } from '@/components/EmergencySOSButton';
-import { PopupChatbot } from '@/components/PopupChatbot';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/utils';
 
@@ -79,7 +78,6 @@ export function Header() {
 
         {/* Desktop Controls */}
         <div className="hidden lg:flex items-center space-x-2">
-          <PopupChatbot variant="inline" />
           <PWAInstallIcon />
           
           <Button
@@ -143,7 +141,7 @@ export function Header() {
             </Link>
           )}
           
-          {/* SOS Button - styled like chatbot button at the end */}
+          {/* SOS Button - at the end */}
           <div className="ml-2 border-l border-border/20 pl-2">
             <EmergencySOSButton variant="compact" />
           </div>
@@ -213,7 +211,6 @@ export function Header() {
               </div>
               <div className="mt-8 flex justify-around">
                 <EmergencySOSButton />
-                <PopupChatbot variant="inline" />
                 <PWAInstallIcon />
               </div>
             </SheetContent>
