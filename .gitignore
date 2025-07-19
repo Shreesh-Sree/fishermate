@@ -38,6 +38,13 @@ yarn-error.log*
 next-env.d.ts
 
 .genkit/*
+# Environment and secret config files
+.env
+.env.local
+.env.*
+*.env
+*.env.local
+*.env.*
 .env*
 .env.local
 .env.development.local
