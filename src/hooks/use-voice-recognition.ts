@@ -43,9 +43,14 @@ export const useVoiceRecognition = (): VoiceRecognitionHook => {
         recognitionRef.current = new SpeechRecognition();
         
         const recognition = recognitionRef.current;
-        recognition.continuous = true;
+        recognition.continuous = false; // Changed to false for better reliability
         recognition.interimResults = true;
-        recognition.lang = 'en-US'; // We'll make this dynamic later
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1; // Add for better performance
+        
+        recognition.onstart = () => {
+          console.log('Speech recognition started');
+        };
         
         recognition.onresult = (event: any) => {
           let finalTranscript = '';
@@ -55,21 +60,28 @@ export const useVoiceRecognition = (): VoiceRecognitionHook => {
             const result = event.results[i];
             if (result.isFinal) {
               finalTranscript += result[0].transcript;
-              setConfidence(result[0].confidence);
+              setConfidence(result[0].confidence || 0.8);
             } else {
               interimTranscript += result[0].transcript;
             }
           }
           
-          setTranscript(finalTranscript || interimTranscript);
+          const transcript = finalTranscript || interimTranscript;
+          if (transcript.trim()) {
+            setTranscript(transcript.trim());
+          }
         };
         
         recognition.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            alert('Microphone access denied. Please enable microphone permissions and try again.');
+          }
           setIsListening(false);
         };
         
         recognition.onend = () => {
+          console.log('Speech recognition ended');
           setIsListening(false);
         };
       } catch (error) {
@@ -78,6 +90,7 @@ export const useVoiceRecognition = (): VoiceRecognitionHook => {
       }
     } else {
       setIsSupported(false);
+      console.log('Speech recognition not supported in this browser');
     }
   }, []);
 

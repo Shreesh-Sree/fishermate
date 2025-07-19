@@ -10,16 +10,19 @@ import FishingAnalyticsCard from '@/components/FishingAnalyticsCard';
 import { FishingJournal } from '@/components/fishing-journal/FishingJournal';
 import { PopupChatbot } from '@/components/PopupChatbot';
 import { GoogleVoiceAssistant } from '@/components/GoogleVoiceAssistant';
+import { EmergencySOSButton } from '@/components/EmergencySOSButton';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useNetworkStatus } from '@/hooks/use-offline';
+import { useFishingLogs } from '@/hooks/use-fishing-logs';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const networkStatus = useNetworkStatus();
+  const { logs, addLog, syncOfflineLogs, isOnline, syncStatus, stats } = useFishingLogs();
 
   // Add safety checks for undefined values
   if (!user) {
@@ -84,12 +87,25 @@ export default function Dashboard() {
               <Badge variant={networkStatus.online ? "default" : "secondary"} className="text-xs px-3 py-1">
                 {networkStatus.online ? "🟢 Online" : "🔴 Offline"}
               </Badge>
+              <Badge 
+                variant={syncStatus === 'syncing' ? "default" : "outline"} 
+                className="text-xs px-3 py-1"
+              >
+                {syncStatus === 'syncing' ? "🔄 Syncing" : 
+                 syncStatus === 'error' ? "⚠️ Sync Error" :
+                 isOnline ? "☁️ Synced" : "💾 Local Storage"}
+              </Badge>
               <Badge variant="outline" className="text-xs px-3 py-1">
                 🌊 Ready to Fish
               </Badge>
               <Badge variant="outline" className="text-xs px-3 py-1">
                 ✨ AI Powered
               </Badge>
+              {stats.totalLogs > 0 && (
+                <Badge variant="secondary" className="text-xs px-3 py-1">
+                  📊 {stats.totalLogs} Trips • {stats.totalCatches} Fish • {stats.uniqueSpecies} Species
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -279,8 +295,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* PWA Install at End of Page */}
-        <div className="fixed bottom-6 right-6 z-50">
+        {/* PWA Install and Emergency SOS */}
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
+          <EmergencySOSButton />
           <PWAInstallIcon />
         </div>
 
