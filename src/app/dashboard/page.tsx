@@ -1,22 +1,20 @@
 'use client';
 
-import { Fish, Map, Calendar, TrendingUp } from 'lucide-react';
+import { Fish, Map, Shield, Scale, Bot, Sun, Wind, Droplets, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PWAInstallIcon } from '@/components/PWAInstallIcon';
 import { WeatherCard } from '@/components/WeatherCard';
 import FishingAnalyticsCard from '@/components/FishingAnalyticsCard';
 import { FishingJournal } from '@/components/fishing-journal/FishingJournal';
-import { PopupChatbot } from '@/components/PopupChatbot';
 import { GoogleVoiceAssistant } from '@/components/GoogleVoiceAssistant';
-import { EmergencySOSButton } from '@/components/EmergencySOSButton';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useNetworkStatus } from '@/hooks/use-offline';
 import { useFishingLogs } from '@/hooks/use-fishing-logs';
+import Link from 'next/link';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -24,13 +22,8 @@ export default function Dashboard() {
   const networkStatus = useNetworkStatus();
   const { logs, addLog, syncOfflineLogs, isOnline, syncStatus, stats } = useFishingLogs();
 
-  // Add safety checks for undefined values
   if (!user) {
-    return null; // Let ProtectedRoute handle the redirect
-  }
-
-  if (!t) {
-    return <div>Loading translations...</div>;
+    return null; // ProtectedRoute will handle the redirect
   }
 
   const handleVoiceCommand = (transcript: string) => {
@@ -38,271 +31,115 @@ export default function Dashboard() {
       console.warn('Invalid transcript received:', transcript);
       return;
     }
-
     const lowerTranscript = transcript.toLowerCase();
-    
-    try {
-      if (lowerTranscript.includes('weather')) {
-        document.querySelector('[data-section="weather"]')?.scrollIntoView({ behavior: 'smooth' });
-      } else if (lowerTranscript.includes('journal') || lowerTranscript.includes('fishing log')) {
-        document.querySelector('[data-section="journal"]')?.scrollIntoView({ behavior: 'smooth' });
-      } else if (lowerTranscript.includes('analytics')) {
-        document.querySelector('[data-section="analytics"]')?.scrollIntoView({ behavior: 'smooth' });
-      }
-    } catch (error) {
-      console.error('Error handling voice command:', error);
-    }
+    const scrollTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
+
+    if (lowerTranscript.includes('weather')) scrollTo('[data-section="weather"]');
+    else if (lowerTranscript.includes('journal') || lowerTranscript.includes('log')) scrollTo('[data-section="journal"]');
+    else if (lowerTranscript.includes('analytics')) scrollTo('[data-section="analytics"]');
+    else if (lowerTranscript.includes('map')) window.location.href = '/map';
+    else if (lowerTranscript.includes('safety')) window.location.href = '/safety';
   };
+
+  const quickActions = [
+    { title: "Find Fishing Spots", href: "/map", icon: Map, color: "text-blue-500" },
+    { title: "Safety Guidelines", href: "/safety", icon: Shield, color: "text-green-500" },
+    { title: "Fishing Regulations", href: "/laws", icon: Scale, color: "text-purple-500" },
+    { title: "AI Assistant", href: "/chat", icon: Bot, color: "text-indigo-500" },
+  ];
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-cyan-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/20">
-        <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="min-h-screen w-full bg-background gradient-bg text-foreground">
+        <main className="container mx-auto px-4 py-8 space-y-8 animate-fade-in">
+          
           {/* Welcome Header */}
-          <div className="text-center space-y-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-200/50 dark:border-blue-500/30 backdrop-blur-sm">
-                <Fish className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-700 bg-clip-text text-transparent">
-                FisherMate.AI
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                Welcome, {user?.email?.split('@')[0] || 'Fisher'}!
               </h1>
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100">
-                Welcome back, {user?.email?.split('@')[0] || 'Fisher'}! 🎣
-              </h2>
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                Your comprehensive fishing companion with AI assistance, weather insights, and comprehensive trip logging.
-                {!networkStatus.online && (
-                  <span className="block mt-2 text-amber-600 dark:text-amber-400 font-medium">
-                    📡 Currently offline - using cached data
-                  </span>
-                )}
+              <p className="text-muted-foreground mt-2">
+                Here's your dashboard for a successful day on the water.
               </p>
             </div>
-            
-            {/* Status Indicators */}
-            <div className="flex justify-center gap-4 flex-wrap">
-              <Badge variant={networkStatus.online ? "default" : "secondary"} className="text-xs px-3 py-1">
-                {networkStatus.online ? "🟢 Online" : "🔴 Offline"}
-              </Badge>
-              <Badge 
-                variant={syncStatus === 'syncing' ? "default" : "outline"} 
-                className="text-xs px-3 py-1"
-              >
-                {syncStatus === 'syncing' ? "🔄 Syncing" : 
-                 syncStatus === 'error' ? "⚠️ Sync Error" :
-                 isOnline ? "☁️ Synced" : "💾 Local Storage"}
-              </Badge>
-              <Badge variant="outline" className="text-xs px-3 py-1">
-                🌊 Ready to Fish
-              </Badge>
-              <Badge variant="outline" className="text-xs px-3 py-1">
-                ✨ AI Powered
-              </Badge>
-              {stats.totalLogs > 0 && (
-                <Badge variant="secondary" className="text-xs px-3 py-1">
-                  📊 {stats.totalLogs} Trips • {stats.totalCatches} Fish • {stats.uniqueSpecies} Species
+            <div className="flex items-center gap-3">
+                <Badge variant={networkStatus.online ? "default" : "destructive"} className="gap-2">
+                    <div className={`w-2 h-2 rounded-full ${networkStatus.online ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                    {networkStatus.online ? "Online" : "Offline"}
                 </Badge>
-              )}
+                <Badge variant="outline" className="gap-2">
+                    {syncStatus === 'syncing' ? "🔄 Syncing..." : isOnline ? "☁️ Synced" : "💾 Saved Locally"}
+                </Badge>
             </div>
           </div>
 
-          {/* Voice Controls */}
-          <Card className="glass-effect border-blue-200/50 dark:border-blue-500/30 shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-lg">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  🎤 Voice Assistant
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ErrorBoundary fallback={
-                <div className="text-center p-4">
-                  <p className="text-muted-foreground">Voice Assistant temporarily unavailable</p>
-                </div>
-              }>
-                <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />
-              </ErrorBoundary>
-            </CardContent>
-          </Card>
-
-          {/* Main Content Grid */}
+          {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Weather & Quick Actions */}
-            <div className="space-y-6">
-              {/* Weather Card */}
-              <div data-section="weather">
-                <ErrorBoundary>
-                  <WeatherCard />
-                </ErrorBoundary>
-              </div>
-
-              {/* Quick Actions */}
-              <Card className="glass-effect shadow-lg border-white/20 dark:border-white/10">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-blue-500/20">
-                      <Map className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                      🚀 Quick Actions
-                    </span>
+            
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Voice Assistant */}
+              <Card className="modern-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <Bot className="w-6 h-6 text-primary" />
+                    Voice Assistant
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start h-12 glass-button-outline hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
-                    onClick={() => window.location.href = '/map'}
-                  >
-                    <Map className="w-4 h-4 mr-3" />
-                    Find Fishing Spots
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start h-12 glass-button-outline hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
-                    onClick={() => window.location.href = '/safety'}
-                  >
-                    <Fish className="w-4 h-4 mr-3" />
-                    Safety Guidelines
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start h-12 glass-button-outline hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                    onClick={() => window.location.href = '/laws'}
-                  >
-                    <TrendingUp className="w-4 h-4 mr-3" />
-                    Fishing Regulations
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start h-12 glass-button-outline hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all duration-200"
-                    onClick={() => window.location.href = '/chat'}
-                  >
-                    <Calendar className="w-4 h-4 mr-3" />
-                    AI Assistant
-                  </Button>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Use voice commands to navigate. Try "show weather" or "open journal".
+                  </p>
+                  <ErrorBoundary fallback={<p className="text-destructive">Voice assistant is currently unavailable.</p>}>
+                    <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />
+                  </ErrorBoundary>
                 </CardContent>
               </Card>
 
-              {/* Analytics Summary */}
-              <div data-section="analytics">
-                <ErrorBoundary>
-                  <FishingAnalyticsCard />
-                </ErrorBoundary>
-              </div>
-            </div>
-
-            {/* Right Column - Fishing Journal */}
-            <div className="lg:col-span-2 space-y-6">
+              {/* Fishing Journal */}
               <div data-section="journal">
-                <ErrorBoundary>
+                <ErrorBoundary fallback={<Card className="modern-card"><CardContent><p>Could not load Fishing Journal.</p></CardContent></Card>}>
                   <FishingJournal />
                 </ErrorBoundary>
               </div>
             </div>
+
+            {/* Right Column */}
+            <div className="space-y-8">
+              {/* Weather Card */}
+              <div data-section="weather">
+                <ErrorBoundary fallback={<Card className="modern-card"><CardContent><p>Could not load Weather Card.</p></CardContent></Card>}>
+                  <WeatherCard />
+                </ErrorBoundary>
+              </div>
+
+              {/* Analytics Card */}
+              <div data-section="analytics">
+                <ErrorBoundary fallback={<Card className="modern-card"><CardContent><p>Could not load Fishing Analytics.</p></CardContent></Card>}>
+                  <FishingAnalyticsCard />
+                </ErrorBoundary>
+              </div>
+
+              {/* Quick Actions */}
+              <Card className="modern-card">
+                <CardHeader>
+                  <CardTitle className="text-xl">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  {quickActions.map((action) => (
+                    <Link href={action.href} key={action.title}>
+                      <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 text-center p-2 hover:bg-muted/50 transition-colors duration-200">
+                        <action.icon className={`w-7 h-7 ${action.color}`} />
+                        <span className="text-xs font-medium">{action.title}</span>
+                      </Button>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
           </div>
-
-          {/* Additional Features Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="glass-effect border-green-200 dark:border-green-700">
-              <CardHeader>
-                <CardTitle className="text-green-700 dark:text-green-300">
-                  🌊 Today's Fishing Conditions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Water Temperature:</span>
-                    <Badge variant="outline">18°C</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Best Fishing Time:</span>
-                    <Badge variant="outline">6:00 AM - 8:00 AM</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Moon Phase:</span>
-                    <Badge variant="outline">🌗 Last Quarter</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tidal Activity:</span>
-                    <Badge variant="outline">Moderate</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-effect border-yellow-200 dark:border-yellow-700">
-              <CardHeader>
-                <CardTitle className="text-yellow-700 dark:text-yellow-300">
-                  📊 This Week's Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Trips Logged:</span>
-                    <Badge variant="outline">3</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Catches:</span>
-                    <Badge variant="outline">12 fish</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Success Rate:</span>
-                    <Badge variant="outline">75%</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Favorite Spot:</span>
-                    <Badge variant="outline">Mirror Lake</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-effect border-purple-200 dark:border-purple-700">
-              <CardHeader>
-                <CardTitle className="text-purple-700 dark:text-purple-300">
-                  🎯 Goals & Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Monthly Goal:</span>
-                    <Badge variant="outline">8/10 trips</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>New Species:</span>
-                    <Badge variant="outline">2 discovered</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Streak:</span>
-                    <Badge variant="outline">5 days 🔥</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Next Badge:</span>
-                    <Badge variant="outline">Explorer 🗺️</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* PWA Install and Emergency SOS */}
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
-          <EmergencySOSButton />
-          <PWAInstallIcon />
-        </div>
-
-        {/* Floating Chatbot */}
-        <PopupChatbot />
+        </main>
       </div>
     </ProtectedRoute>
   );

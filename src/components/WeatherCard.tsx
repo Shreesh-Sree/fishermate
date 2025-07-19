@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CloudSun, Droplets, Wind, Eye, Thermometer, Gauge, Sun, Moon, CloudRain, Umbrella, Navigation, Waves, Zap, AlertTriangle, Cloud, Cloudy, Snowflake, CheckCircle, CloudLightning, type LucideIcon } from 'lucide-react';
+import { CloudSun, Droplets, Wind, Eye, Thermometer, Gauge, Sun, Moon, CloudRain, Umbrella, Navigation, Waves, Zap, AlertTriangle, Cloud, Cloudy, Snowflake, CheckCircle, CloudLightning, AlertCircle, type LucideIcon } from 'lucide-react';
 
-interface WeatherData {
+interface OpenMeteoWeatherData {
   current: {
     temperature_2m: number;
     relative_humidity_2m: number;
@@ -53,7 +53,7 @@ const weatherCodes: { [key: number]: { icon: any; label: string; description: st
 };
 
 export function WeatherCard() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weather, setWeather] = useState<OpenMeteoWeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<string>('Current Location');
 
@@ -364,8 +364,15 @@ const getWindDirection = (degrees: number): string => {
   return directions[index];
 };
 
-const getFishingRecommendation = (weatherData: WeatherData['current'], airQuality?: AirQualityData) => {
-  const { wind, condition, temp, visibility } = weatherData;
+const getFishingRecommendation = (weatherData: OpenMeteoWeatherData['current'], airQuality?: AirQualityData) => {
+  const wind = weatherData.wind_speed_10m;
+  const temp = weatherData.temperature_2m;
+  const visibility = weatherData.visibility;
+  const weatherCode = weatherData.weather_code;
+  
+  // Get condition from weather code
+  const weatherInfo = weatherCodes[weatherCode] || weatherCodes[0];
+  const condition = weatherInfo.label;
 
   // Poor conditions
   if (wind > 25 || visibility < 2 || condition.toLowerCase().includes('storm') || condition.toLowerCase().includes('thunder')) {

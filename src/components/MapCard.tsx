@@ -24,8 +24,6 @@ const useLeaflet = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       import('leaflet').then((leaflet) => {
-        import('leaflet/dist/leaflet.css');
-        
         // Fix for default markers
         delete (leaflet.default.Icon.Default.prototype as any)._getIconUrl;
         leaflet.default.Icon.Default.mergeOptions({

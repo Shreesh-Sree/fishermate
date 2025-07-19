@@ -120,6 +120,9 @@ const en = {
   themeToggle: "Toggle Theme",
   languageToggle: "Toggle Language",
   userMenu: "User Menu",
+  settings: "Settings",
+  help: "Help",
+  openMenu: "Open Menu",
 
   // Map
   map_title: "Interactive Map",
@@ -294,6 +297,9 @@ const ta = {
   themeToggle: "தீம் மாற்று",
   languageToggle: "மொழி மாற்று",
   userMenu: "பயனர் மெனு",
+  settings: "அமைப்புகள்",
+  help: "உதவி",
+  openMenu: "மெனுவைத் திற",
 
   // Map
   map_title: "ஊடாடும் வரைபடம்",

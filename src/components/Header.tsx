@@ -1,6 +1,6 @@
 'use client';
 
-import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle, LogIn, LogOut, User, Menu, X } from 'lucide-react';
+import { Languages, Moon, Sun, Settings, HelpCircle, LogIn, LogOut, User, Menu, LifeBuoy, Bot, Download, LayoutDashboard, Map, Scale, ShieldCheck, MessageSquare, BarChart3, MapPin, Shield, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -23,19 +23,24 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { PWAInstallIcon } from '@/components/PWAInstallIcon';
+import { EmergencySOSButton } from '@/components/EmergencySOSButton';
+import { PopupChatbot } from '@/components/PopupChatbot';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/utils/utils';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
   const { setLocale, t } = useLanguage();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navItems = [
-    { href: "/dashboard", label: t("dashboard"), icon: BarChart3 },
-    { href: "/map", label: t("map"), icon: MapPin },
+    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/map", label: t("map"), icon: Map },
     { href: "/laws", label: t("laws"), icon: Scale },
-    { href: "/safety", label: t("safety"), icon: Shield },
-    { href: "/chat", label: t("chat"), icon: MessageCircle },
+    { href: "/safety", label: t("safety"), icon: ShieldCheck },
+    { href: "/chat", label: t("chat"), icon: MessageSquare },
   ];
 
   const handleMobileNavClick = () => {
@@ -43,90 +48,87 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/10 dark:bg-black/10 border-b border-white/20 dark:border-white/10 shadow-lg">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="sticky top-0 left-0 right-0 z-50 glass-effect shadow-md">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-3 group transition-all duration-300 hover:scale-105"
-          aria-label={t("home")}
-        >
-          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/20 backdrop-blur-sm group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all duration-300">
-            <Image src="/favicon.ico" alt="FisherMate" width={24} height={24} className="w-6 h-6" />
+        <Link href="/" className="flex items-center gap-3 group" aria-label={t("home")}>
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Image src="/favicon.svg" alt="FisherMate Logo" width={28} height={28} />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+          <span className="text-xl font-bold text-gradient">
             FisherMate.AI
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden lg:flex items-center gap-2">
           {navItems.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors"
-              aria-label={`${t("goto")} ${label}`}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
+            <Link key={href} href={href} legacyBehavior passHref>
+              <a className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                pathname === href 
+                  ? "bg-primary/10 text-primary" 
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}>
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </a>
             </Link>
           ))}
         </nav>
 
         {/* Desktop Controls */}
-        <div className="hidden md:flex items-center space-x-3">
-          {/* PWA Install Icon */}
+        <div className="hidden lg:flex items-center space-x-2">
+          <EmergencySOSButton />
+          <PopupChatbot />
           <PWAInstallIcon />
           
-          {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="glass-button-outline"
             aria-label={t("themeToggle")}
           >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
 
-          {/* Language Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="glass-button-outline"
-                aria-label={t("languageToggle")}
-              >
-                <Languages className="h-[1.2rem] w-[1.2rem]" />
+              <Button variant="ghost" size="icon" aria-label={t("languageToggle")}>
+                <Languages className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="glass-effect border-white/20">
-              <DropdownMenuItem onClick={() => setLocale("en")}>
-                🇺🇸 English
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLocale("ta")}>
-                🇮🇳 தமிழ்
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="glass-effect">
+              <DropdownMenuItem onClick={() => setLocale('en')}>English</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLocale('ta')}>தமிழ்</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* User Menu */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="glass-button-outline"
-                  aria-label={t("userMenu")}
-                >
-                  <User className="h-[1.2rem] w-[1.2rem]" />
+                <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("userMenu")}>
+                  <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="glass-effect border-white/20">
+              <DropdownMenuContent align="end" className="glass-effect">
+                <DropdownMenuItem disabled>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span>{user.email}</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { /* Add profile navigation */ }}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  {t("settings")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { /* Add help navigation */ }}>
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  {t("help")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   {t("logout")}
@@ -134,129 +136,85 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login">
-              <Button className="glass-button-primary" size="sm">
-                {t("login")}
-              </Button>
+            <Link href="/login" legacyBehavior passHref>
+                <Button>
+                    <LogIn className="h-5 w-5 mr-2" />
+                    {t("login")}
+                </Button>
             </Link>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden glass-button-outline"
-              aria-label={t("mobileMenu")}
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="glass-effect border-white/20 w-80">
-            <div className="flex flex-col h-full">
-              {/* Mobile Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/20 backdrop-blur-sm">
-                    <Image src="/favicon.ico" alt="FisherMate" width={20} height={20} className="w-5 h-5" />
-                  </div>
-                  <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    FisherMate.AI
-                  </span>
-                </div>
-              </div>
-
-              {/* Mobile Navigation */}
-              <nav className="flex-1 px-4 py-6">
-                <div className="space-y-4">
-                  {navItems.map(({ href, label, icon: Icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={handleMobileNavClick}
-                      className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors p-3 rounded-lg hover:bg-white/10"
-                      aria-label={`${t("goto")} ${label}`}
-                    >
+        {/* Mobile Menu */}
+        <div className="lg:hidden">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={t("openMenu")}>
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full max-w-xs glass-effect">
+              <SheetHeader>
+                <SheetTitle>
+                  <Link href="/" className="flex items-center gap-3" onClick={handleMobileNavClick}>
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Image src="/favicon.svg" alt="FisherMate Logo" width={24} height={24} />
+                    </div>
+                    <span className="text-xl font-bold text-gradient">FisherMate.AI</span>
+                  </Link>
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-8 flex flex-col space-y-2">
+                {navItems.map(({ href, label, icon: Icon }) => (
+                  <Link key={href} href={href} legacyBehavior passHref>
+                    <a onClick={handleMobileNavClick} className={cn(
+                      "flex items-center gap-4 px-4 py-3 rounded-lg text-base font-medium",
+                      pathname === href 
+                        ? "bg-primary/10 text-primary" 
+                        : "text-foreground hover:bg-muted"
+                    )}>
                       <Icon className="h-5 w-5" />
                       <span>{label}</span>
-                    </Link>
-                  ))}
-                </div>
-              </nav>
-
-              {/* Mobile Controls */}
-              <div className="border-t border-white/20 p-4 space-y-4">
-                {/* Theme Control */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("theme")}</label>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant={theme === "light" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setTheme("light")}
-                      className="flex-1"
-                    >
-                      <Sun className="h-4 w-4 mr-2" />
-                      {t("light")}
-                    </Button>
-                    <Button
-                      variant={theme === "dark" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setTheme("dark")}
-                      className="flex-1"
-                    >
-                      <Moon className="h-4 w-4 mr-2" />
-                      {t("dark")}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Language Control */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("language")}</label>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setLocale("en")}
-                      className="flex-1"
-                    >
-                      🇺🇸 English
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setLocale("ta")}
-                      className="flex-1"
-                    >
-                      🇮🇳 தமிழ்
-                    </Button>
-                  </div>
-                </div>
-
-                {/* User Section */}
-                {user ? (
-                  <Button
-                    variant="ghost"
-                    onClick={logout}
-                    className="w-full justify-start text-red-400 hover:text-red-300"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {t("logout")}
-                  </Button>
-                ) : (
-                  <Link href="/login" onClick={handleMobileNavClick}>
-                    <Button className="glass-button-primary w-full">
-                      {t("login")}
-                    </Button>
+                    </a>
                   </Link>
+                ))}
+              </div>
+              <div className="mt-8 border-t border-border/20 pt-6">
+                {user ? (
+                    <div className="space-y-2">
+                        <div className="px-4 py-2 text-muted-foreground">{user.email}</div>
+                        <Link href="#" onClick={handleMobileNavClick} className="flex items-center gap-4 px-4 py-3 rounded-lg text-foreground hover:bg-muted">
+                            <Settings className="h-5 w-5" />
+                            <span>{t('settings')}</span>
+                        </Link>
+                        <Link href="#" onClick={handleMobileNavClick} className="flex items-center gap-4 px-4 py-3 rounded-lg text-foreground hover:bg-muted">
+                            <HelpCircle className="h-5 w-5" />
+                            <span>{t('help')}</span>
+                        </Link>
+                        <a onClick={() => { logout(); handleMobileNavClick(); }} className="flex items-center gap-4 px-4 py-3 rounded-lg text-foreground hover:bg-muted cursor-pointer">
+                            <LogOut className="h-5 w-5" />
+                            <span>{t('logout')}</span>
+                        </a>
+                    </div>
+                ) : (
+                    <Link href="/login" legacyBehavior passHref>
+                        <a onClick={handleMobileNavClick}>
+                            <Button className="w-full">
+                                <LogIn className="h-5 w-5 mr-2" />
+                                {t("login")}
+                            </Button>
+                        </a>
+                    </Link>
                 )}
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+              <div className="mt-8 flex justify-around">
+                <EmergencySOSButton />
+                <PopupChatbot />
+                <PWAInstallIcon />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );
