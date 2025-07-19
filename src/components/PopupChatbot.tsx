@@ -16,7 +16,11 @@ interface Message {
   timestamp: Date;
 }
 
-export function PopupChatbot() {
+interface PopupChatbotProps {
+  variant?: 'floating' | 'inline';
+}
+
+export function PopupChatbot({ variant = 'floating' }: PopupChatbotProps) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -130,6 +134,11 @@ export function PopupChatbot() {
     }, 1000 + Math.random() * 1000); // 1-2 seconds delay
   };
 
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSend();
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -137,7 +146,129 @@ export function PopupChatbot() {
     }
   };
 
-  // Floating chat button
+  // Inline variant for header - just a button that opens dialog
+  if (variant === 'inline') {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open Chat Assistant"
+        className="relative"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+        
+        {/* Chat Dialog for inline variant */}
+        {isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="w-96 h-[500px] m-4">
+              <Card className="w-full h-full shadow-2xl border-2 border-gray-200 rounded-2xl overflow-hidden bg-white/90 backdrop-blur-lg">
+                {/* Header */}
+                <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                      <Bot className="w-5 h-5" />
+                      FisherMate AI
+                      <Badge variant="secondary" className="text-xs bg-green-400 text-green-900 border-none">
+                        Online
+                      </Badge>
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsOpen(false)}
+                      className="w-8 h-8 text-white hover:bg-white/20"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                {/* Messages */}
+                <CardContent className="flex-1 p-0 h-[calc(100%-8rem)]">
+                  <ScrollArea className="h-full">
+                    <div className="p-4 space-y-4">
+                      {messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`flex items-start gap-3 max-w-[80%] ${
+                              message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
+                            }`}
+                          >
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                message.sender === 'user'
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-200 text-gray-700'
+                              }`}
+                            >
+                              {message.sender === 'user' ? (
+                                <User className="w-4 h-4" />
+                              ) : (
+                                <Bot className="w-4 h-4" />
+                              )}
+                            </div>
+                            <div
+                              className={`px-4 py-2 rounded-lg ${
+                                message.sender === 'user'
+                                  ? 'bg-blue-600 text-white rounded-tr-sm'
+                                  : 'bg-gray-100 text-gray-800 rounded-tl-sm'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {isTyping && (
+                        <div className="flex justify-start">
+                          <div className="flex items-start gap-3 max-w-[80%]">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center">
+                              <Bot className="w-4 h-4" />
+                            </div>
+                            <div className="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 rounded-tl-sm">
+                              <div className="flex gap-1">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+
+                {/* Input */}
+                <div className="border-t border-gray-200 p-4 bg-white">
+                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Ask me about fishing..."
+                      className="flex-1"
+                      disabled={isTyping}
+                    />
+                    <Button type="submit" size="icon" disabled={!input.trim() || isTyping}>
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </form>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+      </Button>
+    );
+  }
+
+  // Floating chat button (original behavior)
   if (!isOpen) {
     return (
       <div className="fixed bottom-6 right-6 z-50 animate-fade-in">

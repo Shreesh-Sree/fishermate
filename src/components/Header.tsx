@@ -79,7 +79,7 @@ export function Header() {
 
         {/* Desktop Controls */}
         <div className="hidden lg:flex items-center space-x-2">
-          <PopupChatbot />
+          <PopupChatbot variant="inline" />
           <PWAInstallIcon />
           
           <Button
@@ -213,7 +213,7 @@ export function Header() {
               </div>
               <div className="mt-8 flex justify-around">
                 <EmergencySOSButton />
-                <PopupChatbot />
+                <PopupChatbot variant="inline" />
                 <PWAInstallIcon />
               </div>
             </SheetContent>
