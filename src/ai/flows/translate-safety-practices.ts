@@ -13,24 +13,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const TranslateSafetyPracticesInputSchema = z.object({
-  query: z.string().describe('The query for safety practices at sea.'),
-  targetLanguage: z.string().describe('The target language for translation.'),
-});
-export type TranslateSafetyPracticesInput = z.infer<
-  typeof TranslateSafetyPracticesInputSchema
->;
-
-const TranslateSafetyPracticesOutputSchema = z.object({
-  translation: z.string().describe('The translated query.'),
-  safetyGuidelines: z
-    .string()
-    .describe('Relevant safety guidelines in the target language.'),
-});
-export type TranslateSafetyPracticesOutput = z.infer<
-  typeof TranslateSafetyPracticesOutputSchema
->;
+import {
+  TranslateSafetyPracticesInputSchema,
+  TranslateSafetyPracticesOutputSchema,
+  type TranslateSafetyPracticesInput,
+  type TranslateSafetyPracticesOutput,
+} from '@/types';
 
 export async function translateSafetyPractices(
   input: TranslateSafetyPracticesInput

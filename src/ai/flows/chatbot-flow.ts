@@ -6,7 +6,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {ChatInputSchema, ChatOutputSchema, type ChatInput} from '@/ai/types';
+import {ChatInputSchema, ChatOutputSchema, type ChatInput} from '@/types';
 
 export async function chat(input: ChatInput) {
   return chatbotFlow(input);

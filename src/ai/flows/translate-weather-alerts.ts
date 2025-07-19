@@ -11,17 +11,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const TranslateWeatherAlertsInputSchema = z.object({
-  weatherAlert: z.string().describe('The weather alert text to translate.'),
-  targetLanguage: z.string().describe('The target language for the translation.'),
-});
-export type TranslateWeatherAlertsInput = z.infer<typeof TranslateWeatherAlertsInputSchema>;
-
-const TranslateWeatherAlertsOutputSchema = z.object({
-  translatedAlert: z.string().describe('The translated weather alert.'),
-});
-export type TranslateWeatherAlertsOutput = z.infer<typeof TranslateWeatherAlertsOutputSchema>;
+import {
+  TranslateWeatherAlertsInputSchema,
+  TranslateWeatherAlertsOutputSchema,
+  type TranslateWeatherAlertsInput,
+  type TranslateWeatherAlertsOutput,
+} from '@/types';
 
 export async function translateWeatherAlerts(input: TranslateWeatherAlertsInput): Promise<TranslateWeatherAlertsOutput> {
   return translateWeatherAlertsFlow(input);

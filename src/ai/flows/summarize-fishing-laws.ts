@@ -7,18 +7,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const SummarizeFishingLawsInputSchema = z.object({
-  state: z.string().min(1, "State is required").describe('The state for which to summarize fishing laws.'),
-  query: z.string().min(1, "Query is required").describe('The user query about fishing laws.'),
-});
-export type SummarizeFishingLawsInput = z.infer<typeof SummarizeFishingLawsInputSchema>;
-
-const SummarizeFishingLawsOutputSchema = z.object({
-  summary: z.string().describe('A comprehensive summary of the fishing laws for the given state.'),
-  audio: z.string().optional().describe('Audio URL of the summary (if available).'),
-});
-export type SummarizeFishingLawsOutput = z.infer<typeof SummarizeFishingLawsOutputSchema>;
+import {
+  SummarizeFishingLawsInputSchema,
+  SummarizeFishingLawsOutputSchema,
+  type SummarizeFishingLawsInput,
+  type SummarizeFishingLawsOutput,
+} from '@/types';
 
 export async function summarizeFishingLaws(input: SummarizeFishingLawsInput): Promise<SummarizeFishingLawsOutput> {
   // Validate input before processing

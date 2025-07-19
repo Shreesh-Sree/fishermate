@@ -1,18 +1,18 @@
 "use server";
 
-import {
-  translateSafetyPractices,
-  type TranslateSafetyPracticesInput,
-  type TranslateSafetyPracticesOutput,
-} from "@/ai/flows/translate-safety-practices";
-import {
-  summarizeFishingLaws,
-  type SummarizeFishingLawsInput,
-  type SummarizeFishingLawsOutput,
-} from "@/ai/flows/summarize-fishing-laws";
+import { translateSafetyPractices } from "@/ai/flows/translate-safety-practices";
+import { summarizeFishingLaws } from "@/ai/flows/summarize-fishing-laws";
 import { chat } from "@/ai/flows/chatbot-flow";
 import { z } from "zod";
-import { ChatInputSchema, type ChatInput, type ChatOutput } from "@/ai/types";
+import { 
+  ChatInputSchema, 
+  type ChatInput, 
+  type ChatOutput,
+  type TranslateSafetyPracticesInput,
+  type TranslateSafetyPracticesOutput,
+  type SummarizeFishingLawsInput,
+  type SummarizeFishingLawsOutput,
+} from "@/types";
 
 const safetyTipsSchema = z.object({
   query: z.string().min(1, "Query is required"),
