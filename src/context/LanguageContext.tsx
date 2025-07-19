@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { translations, TranslationKey } from '@/lib/translations';
+import { translations, TranslationKey } from '@/constants/translations';
 
 type Locale = 'en' | 'ta';
 

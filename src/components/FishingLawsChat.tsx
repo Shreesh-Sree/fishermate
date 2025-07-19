@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { indianStates } from "@/lib/data";
+import { indianStates } from "@/utils/data";
 import { handleFishingLaws } from "@/app/actions";
 import type { SummarizeFishingLawsOutput } from "@/ai/flows/summarize-fishing-laws";
 import { useLanguage } from "@/context/LanguageContext";

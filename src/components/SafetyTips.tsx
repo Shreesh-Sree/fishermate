@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { indianLanguages } from "@/lib/data";
+import { indianLanguages } from "@/utils/data";
 import { handleSafetyTips } from "@/app/actions";
 import type { TranslateSafetyPracticesOutput } from "@/ai/flows/translate-safety-practices";
 import { useLanguage } from "@/context/LanguageContext";

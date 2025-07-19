@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { handleChat } from "@/app/actions";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useLanguage } from "@/context/LanguageContext";
 
 type Message = {
