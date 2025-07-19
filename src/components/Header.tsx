@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
+import { PWAInstallIcon } from '@/components/PWAInstallIcon';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
@@ -74,7 +75,10 @@ export function Header() {
         </nav>
 
         {/* Desktop Controls */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-3">
+          {/* PWA Install Icon */}
+          <PWAInstallIcon />
+          
           {/* Theme Toggle */}
           <Button
             variant="ghost"

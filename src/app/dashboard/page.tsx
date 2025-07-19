@@ -4,12 +4,12 @@ import { Fish, Map, Calendar, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
+import { PWAInstallIcon } from '@/components/PWAInstallIcon';
 import { WeatherCard } from '@/components/WeatherCard';
 import FishingAnalyticsCard from '@/components/FishingAnalyticsCard';
 import { FishingJournal } from '@/components/fishing-journal/FishingJournal';
 import { PopupChatbot } from '@/components/PopupChatbot';
-import { VoiceControls } from '@/components/VoiceControls';
+import { GoogleVoiceAssistant } from '@/components/GoogleVoiceAssistant';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
@@ -86,12 +86,14 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <VoiceControls onTranscript={handleVoiceCommand} />
+              <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />
             </CardContent>
           </Card>
 
-          {/* PWA Install Prompt */}
-          <PWAInstallPrompt />
+          {/* PWA Install Icon in Header */}
+          <div className="flex justify-center">
+            <PWAInstallIcon />
+          </div>
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

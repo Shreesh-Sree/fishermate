@@ -17,7 +17,7 @@
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted-foreground: 240 3.8% 35%; /* Improved contrast */
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
@@ -45,7 +45,7 @@
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted-foreground: 240 5% 75%; /* Improved visibility */
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -306,6 +306,112 @@
 /* Smooth transitions for all theme changes */
 * {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Mobile-First Responsive Design */
+@layer utilities {
+  /* Typography Scale for Mobile */
+  .text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
+  .text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
+  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
+  .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-mobile-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-mobile-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+  .text-mobile-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  
+  /* Enhanced Font Visibility */
+  .text-enhanced {
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .text-enhanced-bold {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Mobile-Optimized Containers */
+  .container-mobile {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @screen sm {
+    .container-mobile {
+      max-width: 640px;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @screen md {
+    .container-mobile {
+      max-width: 768px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @screen lg {
+    .container-mobile {
+      max-width: 1024px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @screen xl {
+    .container-mobile {
+      max-width: 1280px;
+    }
+  }
+  
+  /* Mobile-First Spacing */
+  .space-mobile-y-2 > * + * { margin-top: 0.5rem; }
+  .space-mobile-y-4 > * + * { margin-top: 1rem; }
+  .space-mobile-y-6 > * + * { margin-top: 1.5rem; }
+  .space-mobile-y-8 > * + * { margin-top: 2rem; }
+  
+  @screen sm {
+    .space-mobile-y-2 > * + * { margin-top: 0.75rem; }
+    .space-mobile-y-4 > * + * { margin-top: 1.5rem; }
+    .space-mobile-y-6 > * + * { margin-top: 2rem; }
+    .space-mobile-y-8 > * + * { margin-top: 2.5rem; }
+  }
+  
+  /* Touch-Friendly Interactive Elements */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .touch-button {
+    min-height: 48px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  @screen sm {
+    .touch-button {
+      min-height: 44px;
+      padding: 0.625rem 1.25rem;
+    }
+  }
 }
 
 /* Leaflet dark mode support */
