@@ -28,43 +28,56 @@ export const useVoiceRecognition = (): VoiceRecognitionHook => {
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    // Ensure we're in the browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognition) {
       setIsSupported(true);
-      recognitionRef.current = new SpeechRecognition();
       
-      const recognition = recognitionRef.current;
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US'; // We'll make this dynamic later
-      
-      recognition.onresult = (event: any) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+      try {
+        recognitionRef.current = new SpeechRecognition();
         
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscript += result[0].transcript;
-            setConfidence(result[0].confidence);
-          } else {
-            interimTranscript += result[0].transcript;
+        const recognition = recognitionRef.current;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US'; // We'll make this dynamic later
+        
+        recognition.onresult = (event: any) => {
+          let finalTranscript = '';
+          let interimTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+              finalTranscript += result[0].transcript;
+              setConfidence(result[0].confidence);
+            } else {
+              interimTranscript += result[0].transcript;
+            }
           }
-        }
+          
+          setTranscript(finalTranscript || interimTranscript);
+        };
         
-        setTranscript(finalTranscript || interimTranscript);
-      };
-      
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-      
-      recognition.onend = () => {
-        setIsListening(false);
-      };
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+      } catch (error) {
+        console.error('Failed to initialize speech recognition:', error);
+        setIsSupported(false);
+      }
+    } else {
+      setIsSupported(false);
     }
   }, []);
 

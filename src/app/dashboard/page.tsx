@@ -21,15 +21,33 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const networkStatus = useNetworkStatus();
 
+  // Add safety checks for undefined values
+  if (!user) {
+    return null; // Let ProtectedRoute handle the redirect
+  }
+
+  if (!t) {
+    return <div>Loading translations...</div>;
+  }
+
   const handleVoiceCommand = (transcript: string) => {
+    if (!transcript || typeof transcript !== 'string') {
+      console.warn('Invalid transcript received:', transcript);
+      return;
+    }
+
     const lowerTranscript = transcript.toLowerCase();
     
-    if (lowerTranscript.includes('weather')) {
-      document.querySelector('[data-section="weather"]')?.scrollIntoView({ behavior: 'smooth' });
-    } else if (lowerTranscript.includes('journal') || lowerTranscript.includes('fishing log')) {
-      document.querySelector('[data-section="journal"]')?.scrollIntoView({ behavior: 'smooth' });
-    } else if (lowerTranscript.includes('analytics')) {
-      document.querySelector('[data-section="analytics"]')?.scrollIntoView({ behavior: 'smooth' });
+    try {
+      if (lowerTranscript.includes('weather')) {
+        document.querySelector('[data-section="weather"]')?.scrollIntoView({ behavior: 'smooth' });
+      } else if (lowerTranscript.includes('journal') || lowerTranscript.includes('fishing log')) {
+        document.querySelector('[data-section="journal"]')?.scrollIntoView({ behavior: 'smooth' });
+      } else if (lowerTranscript.includes('analytics')) {
+        document.querySelector('[data-section="analytics"]')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Error handling voice command:', error);
     }
   };
 
@@ -86,7 +104,13 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />
+              <ErrorBoundary fallback={
+                <div className="text-center p-4">
+                  <p className="text-muted-foreground">Voice Assistant temporarily unavailable</p>
+                </div>
+              }>
+                <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />
+              </ErrorBoundary>
             </CardContent>
           </Card>
 
