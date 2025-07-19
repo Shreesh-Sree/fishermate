@@ -29,19 +29,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    // Ensure we're in the browser environment
+    if (typeof window === 'undefined') {
       setLoading(false);
-    });
+      return;
+    }
 
-    return () => unsubscribe();
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+      setLoading(false);
+    }
   }, []);
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      if (auth) {
+        await signOut(auth);
+      }
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error; // Re-throw to let UI handle it if needed
     }
   };
 

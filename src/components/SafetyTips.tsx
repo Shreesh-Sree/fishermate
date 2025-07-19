@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { indianLanguages } from "@/utils/data";
 import { handleSafetyTips } from "@/app/actions";
-import type { TranslateSafetyPracticesOutput } from "@/ai/flows/translate-safety-practices";
+import type { TranslateSafetyPracticesOutput } from "@/types/types";
 import { useLanguage } from "@/context/LanguageContext";
 
 const safetyTipsSchema = z.object({
@@ -141,7 +141,7 @@ export function SafetyTips() {
                   <Languages className="w-4 h-4" />
                   {t('translated_query_title')}
                 </h4>
-                <p className="text-muted-foreground italic text-sm mb-4">"{result.translation}"</p>
+                <p className="text-muted-foreground italic text-sm mb-4">"{result.translatedQuery}"</p>
               </div>
               
               <div className="border-t border-border/30 pt-4">

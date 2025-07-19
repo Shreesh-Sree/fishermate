@@ -1,3 +1,5 @@
+'use client';
+
 import { Anchor, Languages, Moon, Sun, Info, HelpCircle, Settings, MapPin, CloudSun, Scale, Shield, BarChart3, MessageCircle, LogIn, LogOut, User, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";

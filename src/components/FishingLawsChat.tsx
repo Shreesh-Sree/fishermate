@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { indianStates } from "@/utils/data";
 import { handleFishingLaws } from "@/app/actions";
-import type { SummarizeFishingLawsOutput } from "@/ai/flows/summarize-fishing-laws";
+import type { SummarizeFishingLawsOutput } from "@/types/types";
 import { useLanguage } from "@/context/LanguageContext";
 
 const prebuiltQuestions = {

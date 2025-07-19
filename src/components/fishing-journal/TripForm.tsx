@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { FishingTrip, Catch, WeatherConditions, WaterConditions } from '@/types/fishing-journal';
+import { FishingTrip, Catch, FishingTechnique } from '@/types/fishing-journal';
 import { VoiceControls } from '../VoiceControls';
 
 interface TripFormProps {
@@ -25,23 +25,24 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
     endTime: '12:00',
     location: {
       name: '',
+      address: '',
       coordinates: { lat: 0, lng: 0 },
       waterBody: 'lake' as const,
       access: 'public' as const,
     },
     weather: {
       temperature: 20,
-      conditions: 'sunny' as const,
+      conditions: 'sunny',
       windSpeed: 5,
-      windDirection: 'north' as const,
+      windDirection: 'north',
       humidity: 60,
       pressure: 1013,
     },
     waterConditions: {
       temperature: 18,
       clarity: 'clear' as const,
-      level: 'normal' as const,
-      current: 'slow' as const,
+      currentStrength: 'moderate' as const,
+      tideStatus: 'rising' as const,
     },
     catches: [] as Catch[],
     techniques: [] as string[],
@@ -76,7 +77,17 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
     if (newCatch.species) {
       setFormData(prev => ({
         ...prev,
-        catches: [...prev.catches, { ...newCatch, id: Date.now().toString() }]
+        catches: [
+          ...prev.catches,
+          {
+            ...newCatch,
+            id: Date.now().toString(),
+            size: newCatch.length, // or provide a default value
+            time: new Date(`${formData.date}T${newCatch.timeOfCatch || formData.startTime}`), // ensure Date type
+            kept: !newCatch.released, // or provide a default value
+            photos: [], // default empty array
+          } as Catch
+        ]
       }));
       setNewCatch({
         species: '',
@@ -173,10 +184,21 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
       alert('Please enter a location name');
       return;
     }
-
     const trip = {
       ...formData,
+      date: new Date(formData.date),
       duration: calculateDuration(),
+      baitUsed: formData.baits, // or set to [] if you want to default to empty
+      location: {
+        ...formData.location,
+        address: formData.location.address || '', // ensure address is present
+      },
+      techniques: formData.techniques.map(name => ({
+        name,
+        description: '',
+        effectiveness: 3,
+        conditions: []
+      })),
     };
 
     onSave(trip);
@@ -244,6 +266,18 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     location: { ...prev.location, name: e.target.value }
+                  }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="locationAddress">Address</Label>
+                <Input
+                  id="locationAddress"
+                  placeholder="e.g., 123 Lake Rd, Tahoe City"
+                  value={formData.location.address}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, address: e.target.value }
                   }))}
                 />
               </div>
@@ -327,6 +361,65 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
             </div>
           </div>
 
+          {/* Water Conditions */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Water Conditions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Water Temperature: {formData.waterConditions.temperature}°C</Label>
+                <Slider
+                  value={[formData.waterConditions.temperature || 18]}
+                  onValueChange={(value) => setFormData(prev => ({
+                    ...prev,
+                    waterConditions: { ...prev.waterConditions, temperature: value[0] }
+                  }))}
+                  min={0}
+                  max={35}
+                  step={1}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="waterClarity">Water Clarity</Label>
+                <Select
+                  value={formData.waterConditions.clarity}
+                  onValueChange={(value: any) => setFormData(prev => ({
+                    ...prev,
+                    waterConditions: { ...prev.waterConditions, clarity: value }
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clear">Clear</SelectItem>
+                    <SelectItem value="murky">Murky</SelectItem>
+                    <SelectItem value="muddy">Muddy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="currentStrength">Current Strength</Label>
+                <Select
+                  value={formData.waterConditions.currentStrength}
+                  onValueChange={(value: any) => setFormData(prev => ({
+                    ...prev,
+                    waterConditions: { ...prev.waterConditions, currentStrength: value }
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="calm">Calm</SelectItem>
+                    <SelectItem value="moderate">Moderate</SelectItem>
+                    <SelectItem value="strong">Strong</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
           {/* Catches */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -369,7 +462,7 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
                     <Badge variant="outline">
                       {catch_.quantity}x {catch_.species}
                     </Badge>
-                    {catch_.weight > 0 && (
+                    {(catch_.weight || 0) > 0 && (
                       <Badge variant="secondary">
                         {catch_.weight} lbs
                       </Badge>
@@ -385,6 +478,144 @@ export function TripForm({ onSave, onClose }: TripFormProps) {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Techniques, Baits & Equipment */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Techniques & Equipment</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="newTechnique">Fishing Techniques</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    id="newTechnique"
+                    placeholder="e.g., Fly fishing, Trolling"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddItem('techniques', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input?.value) {
+                        handleAddItem('techniques', input.value);
+                        input.value = '';
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formData.techniques.map((technique, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {technique}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => handleRemoveItem('techniques', index)}
+                      >
+                        <X className="w-2 h-2" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="newBait">Baits Used</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    id="newBait"
+                    placeholder="e.g., Worms, Lures"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddItem('baits', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input?.value) {
+                        handleAddItem('baits', input.value);
+                        input.value = '';
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formData.baits.map((bait, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {bait}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => handleRemoveItem('baits', index)}
+                      >
+                        <X className="w-2 h-2" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="newEquipment">Equipment</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    id="newEquipment"
+                    placeholder="e.g., Rod, Reel, Net"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddItem('equipment', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input?.value) {
+                        handleAddItem('equipment', input.value);
+                        input.value = '';
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formData.equipment.map((item, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {item}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => handleRemoveItem('equipment', index)}
+                      >
+                        <X className="w-2 h-2" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Success Score */}
