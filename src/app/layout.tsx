@@ -4,14 +4,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Header } from '@/components/Header';
 
 export const metadata: Metadata = {
-  title: 'FisherMate.AI',
-  description: 'AI-powered guide for fisherfolk communities in India. Get instant weather updates, fishing analytics, safety guidelines, and legal information.',
+  title: 'FisherMate.AI - AI Fishing Companion',
+  description: 'AI-powered fishing companion with weather updates, safety guidelines, fishing journal, and voice assistance.',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    apple: '/apple-touch-icon.svg',
   },
 };
 
@@ -21,26 +23,39 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <script 
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', async () => {
+                  try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('ServiceWorker registered');
+                  } catch (error) {
+                    console.log('ServiceWorker registration failed');
+                  }
+                });
+              }
+            `
+          }}
+        />
       </head>
-      <body className="font-sans antialiased transition-colors duration-300 pt-16">
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange={false}
-        >
+      <body className="antialiased">
+        <ErrorBoundary>
           <AuthProvider>
             <LanguageProvider>
-              {children}
-              <Toaster />
+              <ThemeProvider>
+                <Header />
+                <main className="min-h-screen pt-16">
+                  {children}
+                </main>
+                <Toaster />
+              </ThemeProvider>
             </LanguageProvider>
           </AuthProvider>
-        </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
