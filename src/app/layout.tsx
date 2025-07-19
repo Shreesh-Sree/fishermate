@@ -6,6 +6,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'FisherMate.AI - AI Fishing Companion',
@@ -42,15 +43,21 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased flex flex-col min-h-screen">
         <ErrorBoundary>
           <AuthProvider>
             <LanguageProvider>
-              <ThemeProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
                 <Header />
-                <main className="min-h-screen pt-16">
+                <main className="flex-1 pt-16">
                   {children}
                 </main>
+                <Footer />
                 <Toaster />
               </ThemeProvider>
             </LanguageProvider>

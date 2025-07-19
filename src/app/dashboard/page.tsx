@@ -35,33 +35,54 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-cyan-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/20">
         <div className="container mx-auto px-4 py-8 space-y-8">
           {/* Welcome Header */}
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-3">
-              <Fish className="w-12 h-12 text-blue-600" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                FisherMate.AI Dashboard
+          <div className="text-center space-y-6">
+            <div className="flex items-center justify-center gap-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-200/50 dark:border-blue-500/30 backdrop-blur-sm">
+                <Fish className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-700 bg-clip-text text-transparent">
+                FisherMate.AI
               </h1>
             </div>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Your comprehensive fishing companion with AI assistance, weather insights, and trip logging.
-              {!networkStatus.online && ' Currently offline - using cached data.'}
-            </p>
-            {user && (
-              <Badge variant="secondary" className="text-base px-4 py-2">
-                Welcome back, {user.displayName || user.email}!
+            <div className="space-y-2">
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                Welcome back, {user?.email?.split('@')[0] || 'Fisher'}! 🎣
+              </h2>
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Your comprehensive fishing companion with AI assistance, weather insights, and comprehensive trip logging.
+                {!networkStatus.online && (
+                  <span className="block mt-2 text-amber-600 dark:text-amber-400 font-medium">
+                    📡 Currently offline - using cached data
+                  </span>
+                )}
+              </p>
+            </div>
+            
+            {/* Status Indicators */}
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Badge variant={networkStatus.online ? "default" : "secondary"} className="text-xs px-3 py-1">
+                {networkStatus.online ? "🟢 Online" : "🔴 Offline"}
               </Badge>
-            )}
+              <Badge variant="outline" className="text-xs px-3 py-1">
+                🌊 Ready to Fish
+              </Badge>
+              <Badge variant="outline" className="text-xs px-3 py-1">
+                ✨ AI Powered
+              </Badge>
+            </div>
           </div>
 
           {/* Voice Controls */}
-          <Card className="glass-effect border-blue-200 dark:border-blue-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                Voice Assistant
+          <Card className="glass-effect border-blue-200/50 dark:border-blue-500/30 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  🎤 Voice Assistant
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -84,44 +105,48 @@ export default function Dashboard() {
               </div>
 
               {/* Quick Actions */}
-              <Card className="glass-effect">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="w-5 h-5" />
-                    Quick Actions
+              <Card className="glass-effect shadow-lg border-white/20 dark:border-white/10">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="p-2 rounded-lg bg-gradient-to-r from-green-500/20 to-blue-500/20">
+                      <Map className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                      🚀 Quick Actions
+                    </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start"
+                    className="w-full justify-start h-12 glass-button-outline hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
                     onClick={() => window.location.href = '/map'}
                   >
-                    <Map className="w-4 h-4 mr-2" />
+                    <Map className="w-4 h-4 mr-3" />
                     Find Fishing Spots
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start"
+                    className="w-full justify-start h-12 glass-button-outline hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
                     onClick={() => window.location.href = '/safety'}
                   >
-                    <Fish className="w-4 h-4 mr-2" />
+                    <Fish className="w-4 h-4 mr-3" />
                     Safety Guidelines
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start"
+                    className="w-full justify-start h-12 glass-button-outline hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
                     onClick={() => window.location.href = '/laws'}
                   >
-                    <TrendingUp className="w-4 h-4 mr-2" />
+                    <TrendingUp className="w-4 h-4 mr-3" />
                     Fishing Regulations
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start"
+                    className="w-full justify-start h-12 glass-button-outline hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all duration-200"
                     onClick={() => window.location.href = '/chat'}
                   >
-                    <Calendar className="w-4 h-4 mr-2" />
+                    <Calendar className="w-4 h-4 mr-3" />
                     AI Assistant
                   </Button>
                 </CardContent>
