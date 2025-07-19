@@ -114,11 +114,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* PWA Install Icon in Header */}
-          <div className="flex justify-center">
-            <PWAInstallIcon />
-          </div>
-
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Weather & Quick Actions */}
@@ -282,6 +277,11 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* PWA Install at End of Page */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <PWAInstallIcon />
         </div>
 
         {/* Floating Chatbot */}

@@ -82,17 +82,27 @@ export const useVoiceRecognition = (): VoiceRecognitionHook => {
   }, []);
 
   const startListening = () => {
-    if (recognitionRef.current && !isListening) {
-      setIsListening(true);
-      setTranscript('');
-      recognitionRef.current.start();
+    if (recognitionRef.current && !isListening && isSupported) {
+      try {
+        setIsListening(true);
+        setTranscript('');
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+        setIsListening(false);
+      }
     }
   };
 
   const stopListening = () => {
     if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+      try {
+        recognitionRef.current.stop();
+        setIsListening(false);
+      } catch (error) {
+        console.error('Error stopping speech recognition:', error);
+        setIsListening(false);
+      }
     }
   };
 
