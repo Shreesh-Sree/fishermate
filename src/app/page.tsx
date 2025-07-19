@@ -94,7 +94,7 @@ export default function Home() {
                 Everything You Need for a Great Day on the Water
                 </h2>
                 <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-                    From real-time data to AI-powered assistance, we've got you covered.
+                    From real-time data to AI-powered assistance, we&apos;ve got you covered.
                 </p>
             </div>
             

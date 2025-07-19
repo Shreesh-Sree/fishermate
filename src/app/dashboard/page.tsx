@@ -60,7 +60,7 @@ export default function Dashboard() {
                 Welcome, {user?.email?.split('@')[0] || 'Fisher'}!
               </h1>
               <p className="text-muted-foreground mt-2">
-                Here's your dashboard for a successful day on the water.
+                Here&apos;s your dashboard for a successful day on the water.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Use voice commands to navigate. Try "show weather" or "open journal".
+                    Use voice commands to navigate. Try &quot;show weather&quot; or &quot;open journal&quot;.
                   </p>
                   <ErrorBoundary fallback={<p className="text-destructive">Voice assistant is currently unavailable.</p>}>
                     <GoogleVoiceAssistant onTranscript={handleVoiceCommand} />

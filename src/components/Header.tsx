@@ -1,6 +1,6 @@
 'use client';
 
-import { Languages, Moon, Sun, Settings, HelpCircle, LogIn, LogOut, User, Menu, LifeBuoy, Bot, Download, LayoutDashboard, Map, Scale, ShieldCheck, MessageSquare, BarChart3, MapPin, Shield, MessageCircle } from 'lucide-react';
+import { Languages, Moon, Sun, Settings, HelpCircle, LogIn, LogOut, User, Menu, LayoutDashboard, Map, Scale, ShieldCheck, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -79,7 +79,6 @@ export function Header() {
 
         {/* Desktop Controls */}
         <div className="hidden lg:flex items-center space-x-2">
-          <EmergencySOSButton />
           <PopupChatbot />
           <PWAInstallIcon />
           
@@ -143,6 +142,11 @@ export function Header() {
                 </Button>
             </Link>
           )}
+          
+          {/* SOS Button - styled like chatbot button at the end */}
+          <div className="ml-2 border-l border-border/20 pl-2">
+            <EmergencySOSButton variant="compact" />
+          </div>
         </div>
 
         {/* Mobile Menu */}

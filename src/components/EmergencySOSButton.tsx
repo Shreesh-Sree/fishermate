@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -24,10 +23,12 @@ interface EmergencyContact {
   type: 'emergency' | 'coast_guard' | 'police' | 'medical';
 }
 
-export function EmergencySOSButton() {
-  const { t, locale } = useLanguage();
+interface EmergencySOSButtonProps {
+  variant?: 'full' | 'compact';
+}
+
+export function EmergencySOSButton({ variant = 'full' }: EmergencySOSButtonProps) {
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
-  const [countdown, setCountdown] = useState(0);
 
   // Emergency contacts based on region
   const emergencyContacts: EmergencyContact[] = [
@@ -74,6 +75,68 @@ export function EmergencySOSButton() {
     }
   };
 
+  // Compact version for header
+  if (variant === 'compact') {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-800/50"
+            aria-label="Emergency SOS"
+            onClick={handleEmergencyPress}
+          >
+            <Shield className="h-5 w-5" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+          </Button>
+        </AlertDialogTrigger>
+        
+        <AlertDialogContent className="glass-effect border-red-200/50 dark:border-red-500/30 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Emergency Services
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Select emergency service to call immediately. Your location will be shared automatically if available.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {emergencyContacts.map((contact, index) => (
+              <Button
+                key={index}
+                onClick={() => initiateEmergencyCall(contact)}
+                variant="outline"
+                className={`w-full justify-start text-left p-4 h-auto hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                  contact.type === 'emergency' ? 'border-red-300 dark:border-red-600' : ''
+                }`}
+              >
+                <Phone className="w-4 h-4 mr-3 text-red-600" />
+                <div className="flex-1">
+                  <div className="font-semibold">{contact.name}</div>
+                  <div className="text-sm text-muted-foreground">{contact.number}</div>
+                </div>
+                <Badge 
+                  variant={contact.type === 'emergency' ? 'destructive' : 'secondary'}
+                  className="text-xs"
+                >
+                  {contact.type.replace('_', ' ')}
+                </Badge>
+              </Button>
+            ))}
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  // Full version for pages
   return (
     <div className="space-y-4">
       {/* Emergency SOS Button */}
